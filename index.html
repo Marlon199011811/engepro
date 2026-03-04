@@ -723,6 +723,179 @@
   }
   .btn-logout:hover { background: var(--red); color: #fff; }
 
+  /* ============================================================
+     ADMIN PANEL
+  ============================================================ */
+  #admin-screen {
+    position: fixed; inset: 0; z-index: 10000;
+    background: var(--bg);
+    display: none; flex-direction: column;
+    overflow: hidden;
+  }
+  #admin-screen.open { display: flex; }
+  #admin-screen::before {
+    content: '';
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(var(--border) 1px, transparent 1px),
+      linear-gradient(90deg, var(--border) 1px, transparent 1px);
+    background-size: 48px 48px; opacity: 0.4;
+    mask-image: radial-gradient(ellipse 100% 100% at 50% 0%, black 40%, transparent 100%);
+    -webkit-mask-image: radial-gradient(ellipse 100% 100% at 50% 0%, black 40%, transparent 100%);
+  }
+  .admin-topbar {
+    position: relative; z-index: 1;
+    background: rgba(13,15,20,0.95); backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--accent);
+    padding: 0 28px; height: 60px;
+    display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;
+  }
+  .admin-topbar-brand {
+    display: flex; align-items: center; gap: 12px;
+  }
+  .admin-crown { font-size: 22px; }
+  .admin-brand-text { font-family: 'Barlow Condensed', sans-serif; }
+  .admin-brand-title { font-size: 20px; font-weight: 800; color: var(--accent); letter-spacing: 2px; }
+  .admin-brand-sub { font-size: 10px; color: var(--text3); letter-spacing: 2px; font-family: 'Space Mono', monospace; }
+  .admin-topbar-right { display: flex; align-items: center; gap: 12px; }
+  .admin-user-info { font-size: 12px; color: var(--text3); font-family: 'Space Mono', monospace; }
+
+  .admin-layout {
+    position: relative; z-index: 1; flex: 1;
+    display: grid; grid-template-columns: 240px 1fr;
+    overflow: hidden;
+  }
+  .admin-sidebar {
+    background: var(--bg2); border-right: 1px solid var(--border);
+    padding: 20px 0; overflow-y: auto;
+  }
+  .admin-nav-section {
+    font-size: 10px; font-weight: 700; letter-spacing: 2px; color: var(--text3);
+    padding: 6px 20px; text-transform: uppercase; font-family: 'Space Mono', monospace;
+    margin-top: 10px;
+  }
+  .admin-nav-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 11px 20px; cursor: pointer; color: var(--text2);
+    font-size: 14px; font-weight: 500; transition: all 0.15s;
+    border-left: 2px solid transparent;
+  }
+  .admin-nav-item:hover { color: var(--text); background: var(--bg3); }
+  .admin-nav-item.active { color: var(--accent); background: var(--accent-dim); border-left-color: var(--accent); }
+
+  .admin-content { overflow-y: auto; padding: 28px; }
+
+  /* LOGIN GATE */
+  .admin-login-gate {
+    display: flex; align-items: center; justify-content: center;
+    flex: 1; position: relative; z-index: 1;
+  }
+  .admin-login-card {
+    width: 400px; background: var(--bg2);
+    border: 1px solid var(--accent); border-radius: 16px;
+    box-shadow: 0 0 60px var(--accent-glow), 0 24px 60px rgba(0,0,0,0.5);
+    overflow: hidden;
+    animation: loginAppear 0.4s cubic-bezier(.34,1.56,.64,1);
+  }
+  .admin-login-header {
+    padding: 28px 28px 20px; text-align: center;
+    background: linear-gradient(180deg, rgba(245,158,11,0.08) 0%, transparent 100%);
+    border-bottom: 1px solid var(--border);
+  }
+  .admin-login-icon { font-size: 40px; margin-bottom: 8px; }
+  .admin-login-title { font-family: 'Barlow Condensed', sans-serif; font-size: 24px; font-weight: 800; color: var(--accent); letter-spacing: 2px; }
+  .admin-login-sub { font-size: 11px; color: var(--text3); letter-spacing: 1.5px; font-family: 'Space Mono', monospace; margin-top: 4px; }
+
+  /* USER TABLE */
+  .user-table-wrap { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+  .role-badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 3px 10px; border-radius: 20px;
+    font-size: 11px; font-weight: 700; letter-spacing: 0.5px;
+    font-family: 'Space Mono', monospace;
+  }
+  .role-admin   { background: rgba(245,158,11,0.18); color: var(--accent); border: 1px solid rgba(245,158,11,0.3); }
+  .role-operador { background: var(--blue-dim); color: var(--blue); border: 1px solid rgba(59,130,246,0.3); }
+  .role-visualizador { background: var(--bg3); color: var(--text3); border: 1px solid var(--border2); }
+  .status-badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 3px 10px; border-radius: 20px;
+    font-size: 11px; font-weight: 700; letter-spacing: 0.5px;
+    font-family: 'Space Mono', monospace;
+  }
+  .status-badge::before { content: '●'; font-size: 8px; }
+  .status-ativo    { background: var(--green-dim); color: var(--green); }
+  .status-pendente { background: rgba(245,158,11,0.15); color: var(--accent); }
+  .status-bloqueado { background: var(--red-dim); color: var(--red); }
+
+  .perm-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 16px;
+  }
+  .perm-item {
+    display: flex; align-items: center; justify-content: space-between;
+    background: var(--bg3); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 10px 14px;
+  }
+  .perm-label { font-size: 13px; color: var(--text2); font-weight: 500; }
+  .perm-toggle {
+    position: relative; display: inline-block; width: 40px; height: 22px; flex-shrink: 0;
+  }
+  .perm-toggle input { opacity: 0; width: 0; height: 0; }
+  .perm-slider {
+    position: absolute; inset: 0; background: var(--border2);
+    border-radius: 22px; cursor: pointer; transition: 0.2s;
+  }
+  .perm-slider:before {
+    content: ''; position: absolute;
+    width: 16px; height: 16px; left: 3px; bottom: 3px;
+    background: white; border-radius: 50%; transition: 0.2s;
+  }
+  .perm-toggle input:checked + .perm-slider { background: var(--green); }
+  .perm-toggle input:checked + .perm-slider:before { transform: translateX(18px); }
+
+  .admin-stat-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; margin-bottom: 24px; }
+  .admin-stat { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 18px; border-left: 3px solid var(--accent); }
+  .admin-stat.green { border-left-color: var(--green); }
+  .admin-stat.blue  { border-left-color: var(--blue); }
+  .admin-stat.red   { border-left-color: var(--red); }
+  .admin-stat-label { font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text3); font-family: 'Space Mono', monospace; }
+  .admin-stat-val { font-size: 28px; font-weight: 800; font-family: 'Barlow Condensed', sans-serif; color: var(--accent); margin: 4px 0 0; }
+  .admin-stat.green .admin-stat-val { color: var(--green); }
+  .admin-stat.blue  .admin-stat-val { color: var(--blue); }
+  .admin-stat.red   .admin-stat-val { color: var(--red); }
+
+  .admin-section-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 18px; font-weight: 700; letter-spacing: 1px;
+    text-transform: uppercase; color: var(--text);
+    display: flex; align-items: center; gap: 8px;
+    margin-bottom: 16px;
+  }
+  .admin-section-title span { color: var(--accent); }
+
+  .permission-matrix {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: var(--radius); overflow: hidden;
+  }
+  .permission-matrix table { width: 100%; border-collapse: collapse; }
+  .permission-matrix thead th {
+    padding: 12px 16px; font-size: 11px; font-weight: 700; letter-spacing: 1.5px;
+    text-transform: uppercase; color: var(--text3); font-family: 'Space Mono', monospace;
+    border-bottom: 1px solid var(--border); background: var(--bg2); text-align: center;
+  }
+  .permission-matrix thead th:first-child { text-align: left; }
+  .permission-matrix tbody td { padding: 11px 16px; border-bottom: 1px solid var(--border); font-size: 14px; color: var(--text2); text-align: center; }
+  .permission-matrix tbody td:first-child { text-align: left; font-weight: 600; color: var(--text); }
+  .permission-matrix tbody tr:last-child td { border-bottom: none; }
+  .perm-check { font-size: 16px; }
+  .perm-x { font-size: 16px; color: var(--red); opacity: 0.5; }
+
+  /* PERMISSION ENFORCEMENT */
+  body.no-edit .btn-primary[onclick*="save"],
+  body.no-edit .btn[onclick*="Editar"],
+  body.no-edit button[onclick*="openModal"] { opacity: 0.3; pointer-events: none; }
+  body.no-delete .btn-danger { opacity: 0.3; pointer-events: none; }
+
   /* RESPONSIVE */
   @media (max-width: 900px) {
     #sidebar { transform: translateX(-220px); }
@@ -751,6 +924,7 @@
     <div class="login-tabs">
       <button class="login-tab active" id="tab-login" onclick="switchTab('login')">Entrar</button>
       <button class="login-tab" id="tab-register" onclick="switchTab('register')">Criar Conta</button>
+      <button class="login-tab" id="tab-admin" onclick="switchTab('admin')" style="gap:4px">👑 Admin</button>
     </div>
 
     <!-- LOGIN FORM -->
@@ -828,6 +1002,78 @@
       </div>
     </div>
 
+    <!-- ADMIN LOGIN FORM -->
+    <div class="login-body" id="form-admin" style="display:none">
+      <div style="background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.25);border-radius:8px;padding:12px 14px;margin-bottom:18px;font-size:12px;color:var(--text2);line-height:1.6">
+        <strong style="color:var(--accent)">👑 Área Restrita</strong><br>
+        Acesso exclusivo para administradores do sistema.
+      </div>
+      <div class="login-error" id="admin-login-error"></div>
+      <div class="login-field">
+        <label>E-mail do Administrador</label>
+        <div class="login-input-wrap">
+          <span class="input-icon">✉️</span>
+          <input type="email" id="admin-login-email" placeholder="admin@empresa.com">
+        </div>
+      </div>
+      <div class="login-field">
+        <label>Senha</label>
+        <div class="login-input-wrap">
+          <span class="input-icon">🔒</span>
+          <input type="password" id="admin-login-pw" placeholder="••••••••" onkeydown="if(event.key==='Enter')doAdminLogin()">
+          <button class="pw-toggle" onclick="togglePw('admin-login-pw',this)" tabindex="-1">👁</button>
+        </div>
+      </div>
+      <button class="btn-login" id="btn-admin-login" onclick="doAdminLogin()" style="background:linear-gradient(135deg,#f59e0b,#d97706)">
+        👑 Entrar como Administrador
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<!-- ====================================================
+     ADMIN PANEL SCREEN
+===================================================== -->
+<div id="admin-screen">
+  <div class="admin-topbar">
+    <div class="admin-topbar-brand">
+      <span class="admin-crown">👑</span>
+      <div class="admin-brand-text">
+        <div class="admin-brand-title">PAINEL ADMINISTRATIVO</div>
+        <div class="admin-brand-sub">ENGPRO — CONTROLE DE ACESSO</div>
+      </div>
+    </div>
+    <div class="admin-topbar-right">
+      <span class="admin-user-info" id="admin-logged-email"></span>
+      <button class="btn-logout" onclick="doAdminLogout()">Sair do Admin</button>
+      <button onclick="toggleTheme()" title="Tema" style="background:var(--bg3);border:1px solid var(--border2);color:var(--text2);border-radius:var(--radius);width:34px;height:34px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center">🌙</button>
+    </div>
+  </div>
+
+  <div class="admin-layout">
+    <!-- Admin sidebar -->
+    <div class="admin-sidebar">
+      <div class="admin-nav-section">Gerenciamento</div>
+      <div class="admin-nav-item active" id="anav-usuarios" onclick="switchAdminTab('usuarios')">
+        <span>👥</span> Usuários
+      </div>
+      <div class="admin-nav-item" id="anav-permissoes" onclick="switchAdminTab('permissoes')">
+        <span>🔐</span> Permissões por Perfil
+      </div>
+      <div class="admin-nav-section">Configurações</div>
+      <div class="admin-nav-item" id="anav-senha" onclick="switchAdminTab('senha')">
+        <span>🔑</span> Alterar Senha Admin
+      </div>
+      <div class="admin-nav-item" id="anav-sistema" onclick="switchAdminTab('sistema')">
+        <span>⚙️</span> Configurações do Sistema
+      </div>
+    </div>
+
+    <!-- Admin content -->
+    <div class="admin-content" id="admin-content-area">
+      <!-- filled by switchAdminTab -->
+    </div>
   </div>
 </div>
 
@@ -868,6 +1114,10 @@
     <div class="nav-section">Relatórios</div>
     <div class="nav-item" onclick="navigate('relatorios')">
       <span class="icon">📊</span> Relatórios
+    </div>
+    <div class="nav-section admin-only" id="nav-section-admin" style="display:none">Administração</div>
+    <div class="nav-item admin-only" id="nav-item-admin" onclick="openAdminPanel()" style="display:none">
+      <span class="icon">👑</span> Painel Admin
     </div>
   </div>
   <div class="sidebar-footer">
@@ -1457,26 +1707,38 @@
 
 <script>
 // ============================================================
-// AUTH — Login / Register / Logout
+// AUTH — Login / Register / Logout + Admin
 // ============================================================
 let currentUser = null;
+let currentUserProfile = null; // {role, status, permissions}
+let adminUser = null;
+
+// ROLE PERMISSIONS MAP (defaults)
+const DEFAULT_PERMISSIONS = {
+  admin:        { dashboard:true, cotacoes:true, comparar:true, pedidos:true, fornecedores:true, produtos:true, relatorios:true, editar:true, excluir:true },
+  operador:     { dashboard:true, cotacoes:true, comparar:true, pedidos:true, fornecedores:true, produtos:true, relatorios:true, editar:true, excluir:false },
+  visualizador: { dashboard:true, cotacoes:true, comparar:false, pedidos:true, fornecedores:false, produtos:false, relatorios:true, editar:false, excluir:false },
+};
+const NAV_MODULES = ['cotacoes','comparar','pedidos','fornecedores','produtos','relatorios'];
 
 function switchTab(tab) {
-  document.getElementById('form-login').style.display    = tab==='login'    ? '' : 'none';
-  document.getElementById('form-register').style.display = tab==='register' ? '' : 'none';
-  document.getElementById('tab-login').classList.toggle('active', tab==='login');
-  document.getElementById('tab-register').classList.toggle('active', tab==='register');
+  ['login','register','admin'].forEach(t => {
+    const f = document.getElementById('form-'+t);
+    const b = document.getElementById('tab-'+t);
+    if (f) f.style.display = t===tab ? '' : 'none';
+    if (b) b.classList.toggle('active', t===tab);
+  });
   clearAuthMessages();
 }
 
 function clearAuthMessages() {
-  ['login-error','login-success','register-error','register-success'].forEach(id => {
+  ['login-error','login-success','register-error','register-success','admin-login-error'].forEach(id => {
     const el = document.getElementById(id);
     if (el) { el.classList.remove('show'); el.textContent = ''; }
   });
 }
 
-function showAuthMsg(id, msg, isError=true) {
+function showAuthMsg(id, msg) {
   const el = document.getElementById(id);
   if (!el) return;
   el.textContent = msg; el.classList.add('show');
@@ -1512,61 +1774,108 @@ function checkPwStrength(pw) {
 
 function fbErrMsg(code) {
   const map = {
-    'auth/user-not-found': 'E-mail não encontrado. Verifique ou crie uma conta.',
-    'auth/wrong-password': 'Senha incorreta. Tente novamente.',
+    'auth/user-not-found': 'E-mail não encontrado.',
+    'auth/wrong-password': 'Senha incorreta.',
     'auth/invalid-credential': 'E-mail ou senha inválidos.',
     'auth/email-already-in-use': 'Este e-mail já está cadastrado.',
     'auth/weak-password': 'Senha muito fraca. Use ao menos 6 caracteres.',
     'auth/invalid-email': 'E-mail inválido.',
     'auth/too-many-requests': 'Muitas tentativas. Aguarde alguns minutos.',
-    'auth/network-request-failed': 'Erro de conexão. Verifique sua internet.',
+    'auth/network-request-failed': 'Erro de conexão.',
   };
   return map[code] || 'Erro inesperado. Tente novamente.';
 }
 
-async function doLogin() {
-  if (!firebase.apps.length) {
-    showAuthMsg('login-error', 'Configure o Firebase antes de fazer login. Clique em "⚙ Configurar Firebase" na tela principal.'); return;
-  }
-  const email = document.getElementById('login-email').value.trim();
-  const pw    = document.getElementById('login-pw').value;
-  if (!email || !pw) { showAuthMsg('login-error','Preencha e-mail e senha.'); return; }
-  const btn = document.getElementById('btn-login');
-  btn.disabled = true; btn.textContent = 'Entrando...';
-  clearAuthMessages();
-  try {
-    await firebase.auth().signInWithEmailAndPassword(email, pw);
-    // onAuthStateChanged handles the rest
-  } catch(e) {
-    showAuthMsg('login-error', fbErrMsg(e.code));
-    btn.disabled = false; btn.textContent = 'Entrar no Sistema';
-  }
-}
-
+// ---- REGISTER ----
 async function doRegister() {
-  if (!firebase.apps.length) {
-    showAuthMsg('register-error', 'Configure o Firebase antes de cadastrar.'); return;
-  }
+  if (!firebase.apps.length) { showAuthMsg('register-error', 'Configure o Firebase antes de cadastrar.'); return; }
   const name  = document.getElementById('reg-name').value.trim();
   const email = document.getElementById('reg-email').value.trim();
   const pw    = document.getElementById('reg-pw').value;
   const pw2   = document.getElementById('reg-pw2').value;
-  if (!name)           { showAuthMsg('register-error','Informe seu nome.'); return; }
-  if (!email)          { showAuthMsg('register-error','Informe seu e-mail.'); return; }
-  if (pw.length < 6)   { showAuthMsg('register-error','A senha deve ter pelo menos 6 caracteres.'); return; }
-  if (pw !== pw2)      { showAuthMsg('register-error','As senhas não conferem.'); return; }
+  if (!name)         { showAuthMsg('register-error','Informe seu nome.'); return; }
+  if (!email)        { showAuthMsg('register-error','Informe seu e-mail.'); return; }
+  if (pw.length < 6) { showAuthMsg('register-error','Senha com ao menos 6 caracteres.'); return; }
+  if (pw !== pw2)    { showAuthMsg('register-error','As senhas não conferem.'); return; }
   const btn = document.getElementById('btn-register');
   btn.disabled = true; btn.textContent = 'Criando conta...';
   clearAuthMessages();
   try {
     const cred = await firebase.auth().createUserWithEmailAndPassword(email, pw);
     await cred.user.updateProfile({ displayName: name });
-    showAuthMsg('register-success', `✅ Conta criada! Bem-vindo, ${name}!`, false);
+    // Check if first user → auto-admin, else pendente
+    const snap = await db.collection('usuarios').get();
+    const isFirst = snap.empty;
+    const role = isFirst ? 'admin' : 'operador';
+    const status = isFirst ? 'ativo' : 'pendente';
+    const profile = {
+      uid: cred.user.uid, nome: name, email,
+      role, status,
+      permissions: { ...DEFAULT_PERMISSIONS[role] },
+      criadoEm: new Date().toISOString(),
+      ultimoLogin: new Date().toISOString()
+    };
+    await db.collection('usuarios').doc(cred.user.uid).set(profile);
+    if (!isFirst) {
+      // Sign out immediately; admin must approve first
+      await firebase.auth().signOut();
+      showAuthMsg('register-success', `✅ Conta criada! Aguarde aprovação do administrador para acessar o sistema.`);
+      btn.disabled = false; btn.textContent = 'Criar Conta';
+      return;
+    }
+    showAuthMsg('register-success', `✅ Conta criada! Você é o primeiro usuário e recebeu acesso de Administrador.`);
     btn.disabled = false; btn.textContent = 'Criar Conta';
-    // onAuthStateChanged will fire and open the app
   } catch(e) {
     showAuthMsg('register-error', fbErrMsg(e.code));
     btn.disabled = false; btn.textContent = 'Criar Conta';
+  }
+}
+
+// ---- LOGIN ----
+async function doLogin() {
+  if (!firebase.apps.length) { showAuthMsg('login-error', 'Configure o Firebase primeiro.'); return; }
+  const email = document.getElementById('login-email').value.trim();
+  const pw    = document.getElementById('login-pw').value;
+  if (!email || !pw) { showAuthMsg('login-error','Preencha e-mail e senha.'); return; }
+  const btn = document.getElementById('btn-login');
+  btn.disabled = true; btn.textContent = 'Verificando...';
+  clearAuthMessages();
+  try {
+    await firebase.auth().signInWithEmailAndPassword(email, pw);
+    // onAuthStateChanged will check profile
+  } catch(e) {
+    showAuthMsg('login-error', fbErrMsg(e.code));
+    btn.disabled = false; btn.textContent = 'Entrar no Sistema';
+  }
+}
+
+// ---- ADMIN LOGIN (via Firebase Auth + role check) ----
+async function doAdminLogin() {
+  if (!firebase.apps.length) { showAuthMsg('admin-login-error', 'Configure o Firebase primeiro.'); return; }
+  const email = document.getElementById('admin-login-email').value.trim();
+  const pw    = document.getElementById('admin-login-pw').value;
+  if (!email || !pw) { showAuthMsg('admin-login-error','Preencha e-mail e senha.'); return; }
+  const btn = document.getElementById('btn-admin-login');
+  btn.disabled = true; btn.textContent = 'Verificando...';
+  clearAuthMessages();
+  try {
+    const cred = await firebase.auth().signInWithEmailAndPassword(email, pw);
+    // Check if user is admin in Firestore
+    const doc = await db.collection('usuarios').doc(cred.user.uid).get();
+    if (!doc.exists || doc.data().role !== 'admin') {
+      await firebase.auth().signOut();
+      showAuthMsg('admin-login-error', '⛔ Acesso negado. Este usuário não tem perfil de Administrador.');
+      btn.disabled = false; btn.textContent = '👑 Entrar como Administrador';
+      return;
+    }
+    adminUser = cred.user;
+    // Update last login
+    await db.collection('usuarios').doc(cred.user.uid).update({ ultimoLogin: new Date().toISOString() });
+    openAdminPanelDirect();
+    btn.disabled = false; btn.textContent = '👑 Entrar como Administrador';
+  } catch(e) {
+    showAuthMsg('admin-login-error', fbErrMsg(e.code));
+    btn.disabled = false; btn.textContent = '👑 Entrar como Administrador';
   }
 }
 
@@ -1575,29 +1884,383 @@ async function doLogout() {
     await firebase.auth().signOut();
   }
 }
+async function doAdminLogout() {
+  if (confirm('Sair do painel administrativo?')) {
+    if (adminUser && adminUser !== currentUser) {
+      await firebase.auth().signOut();
+    }
+    adminUser = null;
+    document.getElementById('admin-screen').classList.remove('open');
+    if (currentUser) {
+      document.getElementById('app-wrapper').style.display = '';
+    } else {
+      document.getElementById('login-screen').style.display = 'flex';
+    }
+  }
+}
 
-function showApp(user) {
+function showApp(user, profile) {
   currentUser = user;
-  // Update user chip in topbar
+  currentUserProfile = profile;
   const initials = (user.displayName || user.email || '?').charAt(0).toUpperCase();
   document.getElementById('user-avatar').textContent = initials;
   document.getElementById('user-email-display').textContent = user.displayName || user.email;
   document.getElementById('user-chip').style.display = 'flex';
   document.getElementById('btn-logout').style.display = '';
-  // Hide login, show app
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('app-wrapper').style.display = '';
+
+  // Apply permissions to nav
+  applyPermissions(profile);
+
+  // Show admin nav item if admin
+  const isAdmin = profile?.role === 'admin';
+  document.getElementById('nav-section-admin').style.display = isAdmin ? '' : 'none';
+  document.getElementById('nav-item-admin').style.display = isAdmin ? '' : 'none';
+}
+
+function applyPermissions(profile) {
+  if (!profile) return;
+  const perms = profile.permissions || DEFAULT_PERMISSIONS[profile.role] || DEFAULT_PERMISSIONS.visualizador;
+  NAV_MODULES.forEach(mod => {
+    const el = document.querySelector(`.nav-item[onclick="navigate('${mod}')"]`);
+    if (el) el.style.display = perms[mod] !== false ? '' : 'none';
+  });
+  // Disable edit/delete buttons via CSS class on body
+  document.body.classList.toggle('no-edit', !perms.editar);
+  document.body.classList.toggle('no-delete', !perms.excluir);
 }
 
 function showLogin() {
-  currentUser = null;
+  currentUser = null; currentUserProfile = null;
   document.getElementById('user-chip').style.display = 'none';
   document.getElementById('btn-logout').style.display = 'none';
   document.getElementById('login-screen').style.display = 'flex';
   document.getElementById('app-wrapper').style.display = 'none';
-  // Reset login button
   const btn = document.getElementById('btn-login');
   if (btn) { btn.disabled = false; btn.textContent = 'Entrar no Sistema'; }
+}
+
+// ============================================================
+// ADMIN PANEL
+// ============================================================
+function openAdminPanel() {
+  // Called from main app sidebar (user is already logged in as admin)
+  adminUser = currentUser;
+  openAdminPanelDirect();
+}
+function openAdminPanelDirect() {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app-wrapper').style.display = 'none';
+  document.getElementById('admin-screen').classList.add('open');
+  document.getElementById('admin-logged-email').textContent = adminUser?.email || '';
+  switchAdminTab('usuarios');
+}
+
+function switchAdminTab(tab) {
+  ['usuarios','permissoes','senha','sistema'].forEach(t => {
+    const el = document.getElementById('anav-'+t);
+    if (el) el.classList.toggle('active', t===tab);
+  });
+  const area = document.getElementById('admin-content-area');
+  if (tab==='usuarios')    renderAdminUsuarios(area);
+  if (tab==='permissoes')  renderAdminPermissoes(area);
+  if (tab==='senha')       renderAdminSenha(area);
+  if (tab==='sistema')     renderAdminSistema(area);
+}
+
+// ---- USUARIOS TAB ----
+async function renderAdminUsuarios(area) {
+  area.innerHTML = `<div style="color:var(--text3);font-size:13px;padding:40px;text-align:center">Carregando usuários...</div>`;
+  try {
+    const snap = await db.collection('usuarios').get();
+    const users = snap.docs.map(d => d.data());
+    const total = users.length;
+    const ativos = users.filter(u=>u.status==='ativo').length;
+    const pendentes = users.filter(u=>u.status==='pendente').length;
+    const bloqueados = users.filter(u=>u.status==='bloqueado').length;
+
+    area.innerHTML = `
+      <div class="admin-section-title">👥 Usuários Cadastrados <span>/ ${total}</span></div>
+      <div class="admin-stat-grid">
+        <div class="admin-stat green"><div class="admin-stat-label">Ativos</div><div class="admin-stat-val">${ativos}</div></div>
+        <div class="admin-stat"><div class="admin-stat-label">Total</div><div class="admin-stat-val">${total}</div></div>
+        <div class="admin-stat"><div class="admin-stat-label">Pendentes</div><div class="admin-stat-val" style="color:var(--accent)">${pendentes}</div></div>
+        <div class="admin-stat red"><div class="admin-stat-label">Bloqueados</div><div class="admin-stat-val">${bloqueados}</div></div>
+      </div>
+      ${pendentes > 0 ? `<div style="background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.3);border-radius:var(--radius);padding:12px 16px;margin-bottom:16px;font-size:13px;color:var(--accent)">
+        ⚠️ <strong>${pendentes}</strong> usuário(s) aguardando aprovação de acesso.
+      </div>` : ''}
+      <div class="user-table-wrap">
+        <table style="width:100%;border-collapse:collapse">
+          <thead>
+            <tr>
+              <th style="padding:11px 16px;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);font-family:'Space Mono',monospace;border-bottom:1px solid var(--border);text-align:left">Usuário</th>
+              <th style="padding:11px 16px;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);font-family:'Space Mono',monospace;border-bottom:1px solid var(--border);text-align:left">E-mail</th>
+              <th style="padding:11px 16px;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);font-family:'Space Mono',monospace;border-bottom:1px solid var(--border);text-align:left">Perfil</th>
+              <th style="padding:11px 16px;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);font-family:'Space Mono',monospace;border-bottom:1px solid var(--border);text-align:left">Status</th>
+              <th style="padding:11px 16px;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);font-family:'Space Mono',monospace;border-bottom:1px solid var(--border);text-align:left">Último Acesso</th>
+              <th style="padding:11px 16px;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);font-family:'Space Mono',monospace;border-bottom:1px solid var(--border);text-align:left">Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${users.map(u => `
+              <tr style="border-bottom:1px solid var(--border)">
+                <td style="padding:13px 16px">
+                  <div style="display:flex;align-items:center;gap:10px">
+                    <div style="width:34px;height:34px;border-radius:50%;background:${u.role==='admin'?'var(--accent)':'var(--bg3)'};color:${u.role==='admin'?'#000':'var(--text2)'};display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;font-family:'Barlow Condensed',sans-serif;border:1px solid var(--border2);flex-shrink:0">${(u.nome||u.email||'?').charAt(0).toUpperCase()}</div>
+                    <strong style="color:var(--text)">${u.nome||'—'}</strong>
+                  </div>
+                </td>
+                <td style="padding:13px 16px;font-size:13px;color:var(--text3)">${u.email}</td>
+                <td style="padding:13px 16px">
+                  <select onchange="updateUserField('${u.uid}','role',this.value)"
+                    style="background:var(--bg3);border:1px solid var(--border2);color:var(--text);border-radius:4px;padding:5px 8px;font-size:12px;font-family:'Barlow',sans-serif;cursor:pointer">
+                    <option value="admin"     ${u.role==='admin'?'selected':''}>👑 Admin</option>
+                    <option value="operador"  ${u.role==='operador'?'selected':''}>🔧 Operador</option>
+                    <option value="visualizador" ${u.role==='visualizador'?'selected':''}>👁 Visualizador</option>
+                  </select>
+                </td>
+                <td style="padding:13px 16px">
+                  <select onchange="updateUserField('${u.uid}','status',this.value)"
+                    style="background:var(--bg3);border:1px solid var(--border2);color:var(--text);border-radius:4px;padding:5px 8px;font-size:12px;font-family:'Barlow',sans-serif;cursor:pointer">
+                    <option value="ativo"    ${u.status==='ativo'?'selected':''}>✅ Ativo</option>
+                    <option value="pendente" ${u.status==='pendente'?'selected':''}>⏳ Pendente</option>
+                    <option value="bloqueado"${u.status==='bloqueado'?'selected':''}>🚫 Bloqueado</option>
+                  </select>
+                </td>
+                <td style="padding:13px 16px;font-size:12px;color:var(--text3);font-family:'Space Mono',monospace">${u.ultimoLogin ? new Date(u.ultimoLogin).toLocaleString('pt-BR') : '—'}</td>
+                <td style="padding:13px 16px">
+                  <div style="display:flex;gap:8px;flex-wrap:wrap">
+                    <button class="btn btn-ghost btn-sm" onclick="openPermissionsModal('${u.uid}','${u.nome||u.email}','${u.role}')">🔐 Permissões</button>
+                    ${u.uid !== adminUser?.uid ? `<button class="btn btn-danger btn-sm" onclick="deleteUser('${u.uid}','${u.nome||u.email}')">🗑</button>` : ''}
+                  </div>
+                </td>
+              </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>`;
+  } catch(e) {
+    area.innerHTML = `<div style="color:var(--red);padding:20px">Erro ao carregar usuários: ${e.message}</div>`;
+  }
+}
+
+async function updateUserField(uid, field, value) {
+  try {
+    const update = { [field]: value };
+    // When changing role, reset permissions to defaults
+    if (field === 'role') {
+      update.permissions = { ...DEFAULT_PERMISSIONS[value] };
+    }
+    await db.collection('usuarios').doc(uid).update(update);
+    showToast(`✅ Usuário atualizado com sucesso.`);
+  } catch(e) { showToast('❌ Erro: ' + e.message, true); }
+}
+
+async function deleteUser(uid, nome) {
+  if (!confirm(`Remover "${nome}" do sistema? Esta ação não pode ser desfeita.`)) return;
+  try {
+    await db.collection('usuarios').doc(uid).delete();
+    showToast('🗑 Usuário removido.');
+    switchAdminTab('usuarios');
+  } catch(e) { showToast('❌ Erro: ' + e.message, true); }
+}
+
+// ---- PERMISSIONS MODAL ----
+async function openPermissionsModal(uid, nome, role) {
+  const snap = await db.collection('usuarios').doc(uid).get();
+  const profile = snap.data();
+  const perms = profile.permissions || DEFAULT_PERMISSIONS[role] || DEFAULT_PERMISSIONS.visualizador;
+
+  const PERM_LABELS = {
+    dashboard: '📊 Dashboard', cotacoes: '📋 Cotações', comparar: '⚖️ Comparar Propostas',
+    pedidos: '🛒 Pedidos de Compra', fornecedores: '🏭 Fornecedores', produtos: '📦 Produtos',
+    relatorios: '📈 Relatórios', editar: '✏️ Editar Registros', excluir: '🗑 Excluir Registros',
+  };
+
+  // Build modal
+  const existing = document.getElementById('modal-permissions');
+  if (existing) existing.remove();
+  const modal = document.createElement('div');
+  modal.className = 'modal-overlay'; modal.id = 'modal-permissions';
+  modal.innerHTML = `
+    <div class="modal" style="max-width:580px">
+      <div class="modal-header">
+        <div class="modal-title">🔐 Permissões — ${nome}</div>
+        <button class="modal-close" onclick="document.getElementById('modal-permissions').remove()">×</button>
+      </div>
+      <div class="modal-body">
+        <div style="font-size:12px;color:var(--text3);margin-bottom:16px;font-family:'Space Mono',monospace">Perfil: <strong style="color:var(--accent)">${role.toUpperCase()}</strong> — personalize as permissões abaixo.</div>
+        <div class="perm-grid">
+          ${Object.entries(PERM_LABELS).map(([key, label]) => `
+            <div class="perm-item">
+              <span class="perm-label">${label}</span>
+              <label class="perm-toggle">
+                <input type="checkbox" id="perm-${key}" ${perms[key]?'checked':''}>
+                <span class="perm-slider"></span>
+              </label>
+            </div>`).join('')}
+        </div>
+      </div>
+      <div class="modal-footer" style="justify-content:space-between">
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-ghost btn-sm" onclick="resetPermToRole('${uid}','${role}')">↩ Redefinir para ${role}</button>
+        </div>
+        <div style="display:flex;gap:10px">
+          <button class="btn btn-ghost" onclick="document.getElementById('modal-permissions').remove()">Cancelar</button>
+          <button class="btn btn-primary" onclick="savePermissions('${uid}')">Salvar Permissões</button>
+        </div>
+      </div>
+    </div>`;
+  modal.classList.add('open');
+  document.body.appendChild(modal);
+}
+
+async function savePermissions(uid) {
+  const PERM_KEYS = ['dashboard','cotacoes','comparar','pedidos','fornecedores','produtos','relatorios','editar','excluir'];
+  const perms = {};
+  PERM_KEYS.forEach(k => { perms[k] = document.getElementById('perm-'+k)?.checked || false; });
+  try {
+    await db.collection('usuarios').doc(uid).update({ permissions: perms });
+    showToast('✅ Permissões salvas.');
+    document.getElementById('modal-permissions')?.remove();
+  } catch(e) { showToast('❌ Erro: ' + e.message, true); }
+}
+
+async function resetPermToRole(uid, role) {
+  const defaults = DEFAULT_PERMISSIONS[role] || DEFAULT_PERMISSIONS.visualizador;
+  Object.entries(defaults).forEach(([k,v]) => {
+    const el = document.getElementById('perm-'+k);
+    if (el) el.checked = v;
+  });
+}
+
+// ---- PERMISSIONS MATRIX TAB ----
+function renderAdminPermissoes(area) {
+  const PERMS = [
+    ['Dashboard','dashboard'],['Cotações','cotacoes'],['Comparar Propostas','comparar'],
+    ['Pedidos de Compra','pedidos'],['Fornecedores','fornecedores'],['Produtos','produtos'],
+    ['Relatórios','relatorios'],['Editar Registros','editar'],['Excluir Registros','excluir'],
+  ];
+  const roles = ['admin','operador','visualizador'];
+  const roleLabels = { admin:'👑 Admin', operador:'🔧 Operador', visualizador:'👁 Visualizador' };
+  area.innerHTML = `
+    <div class="admin-section-title">🔐 Matriz de Permissões <span>/ Por Perfil</span></div>
+    <p style="font-size:13px;color:var(--text3);margin-bottom:20px">Permissões padrão por perfil. Customize por usuário individualmente na aba Usuários → Permissões.</p>
+    <div class="permission-matrix">
+      <table>
+        <thead>
+          <tr>
+            <th style="text-align:left;width:40%">Funcionalidade</th>
+            ${roles.map(r=>`<th>${roleLabels[r]}</th>`).join('')}
+          </tr>
+        </thead>
+        <tbody>
+          ${PERMS.map(([label, key])=>`
+            <tr>
+              <td>${label}</td>
+              ${roles.map(r=>`<td><span class="perm-check">${DEFAULT_PERMISSIONS[r][key]?'✅':'<span class="perm-x">✗</span>'}</span></td>`).join('')}
+            </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>`;
+}
+
+// ---- CHANGE PASSWORD TAB ----
+function renderAdminSenha(area) {
+  area.innerHTML = `
+    <div class="admin-section-title">🔑 Alterar Senha <span>/ Administrador</span></div>
+    <div style="max-width:440px">
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:24px">
+        <div id="admin-pw-error" class="login-error"></div>
+        <div id="admin-pw-success" class="login-success"></div>
+        <div class="field" style="margin-bottom:16px">
+          <label>Nova Senha</label>
+          <div class="login-input-wrap">
+            <span class="input-icon">🔒</span>
+            <input type="password" id="admin-new-pw" placeholder="Mínimo 6 caracteres" oninput="checkPwStrength(this.value)" style="background:var(--bg3);border:1px solid var(--border2);color:var(--text);border-radius:var(--radius);padding:10px 13px 10px 40px;font-size:14px;width:100%;outline:none">
+            <button class="pw-toggle" onclick="togglePw('admin-new-pw',this)" tabindex="-1">👁</button>
+          </div>
+          <div class="pw-strength" style="margin-top:8px">
+            <div class="pw-strength-bar"><div class="pw-strength-fill" id="pw-fill"></div></div>
+            <div class="pw-strength-label" id="pw-label">Digite uma senha</div>
+          </div>
+        </div>
+        <div class="field" style="margin-bottom:20px">
+          <label>Confirmar Nova Senha</label>
+          <div class="login-input-wrap">
+            <span class="input-icon">🔒</span>
+            <input type="password" id="admin-confirm-pw" placeholder="Repita a senha" style="background:var(--bg3);border:1px solid var(--border2);color:var(--text);border-radius:var(--radius);padding:10px 13px 10px 40px;font-size:14px;width:100%;outline:none">
+            <button class="pw-toggle" onclick="togglePw('admin-confirm-pw',this)" tabindex="-1">👁</button>
+          </div>
+        </div>
+        <button class="btn btn-primary" onclick="changeAdminPassword()" style="width:100%;padding:12px">Salvar Nova Senha</button>
+        <p style="font-size:12px;color:var(--text3);margin-top:12px;text-align:center">A senha é alterada no Firebase Authentication.</p>
+      </div>
+    </div>`;
+}
+
+async function changeAdminPassword() {
+  const pw  = document.getElementById('admin-new-pw').value;
+  const pw2 = document.getElementById('admin-confirm-pw').value;
+  const errEl = document.getElementById('admin-pw-error');
+  const okEl  = document.getElementById('admin-pw-success');
+  errEl.classList.remove('show'); okEl.classList.remove('show');
+  if (pw.length < 6) { errEl.textContent='Senha deve ter ao menos 6 caracteres.'; errEl.classList.add('show'); return; }
+  if (pw !== pw2)    { errEl.textContent='As senhas não conferem.'; errEl.classList.add('show'); return; }
+  try {
+    await firebase.auth().currentUser.updatePassword(pw);
+    okEl.textContent = '✅ Senha alterada com sucesso!'; okEl.classList.add('show');
+    document.getElementById('admin-new-pw').value = '';
+    document.getElementById('admin-confirm-pw').value = '';
+  } catch(e) {
+    errEl.textContent = fbErrMsg(e.code) || e.message; errEl.classList.add('show');
+  }
+}
+
+// ---- SYSTEM CONFIG TAB ----
+function renderAdminSistema(area) {
+  const fbCfg = (() => { try { return JSON.parse(localStorage.getItem('engpro_fb_config')||'{}'); } catch(e) { return {}; } })();
+  area.innerHTML = `
+    <div class="admin-section-title">⚙️ Configurações do Sistema</div>
+    <div style="max-width:560px;display:grid;gap:20px">
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:20px">
+        <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:12px">🔥 Conexão Firebase</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:13px">
+          <div style="color:var(--text3)">Project ID</div><div style="color:var(--accent);font-family:'Space Mono',monospace">${fbCfg.projectId||'—'}</div>
+          <div style="color:var(--text3)">Auth Domain</div><div style="color:var(--text2)">${fbCfg.authDomain||'—'}</div>
+          <div style="color:var(--text3)">Status</div><div id="admin-fb-status" style="color:var(--green)">● Online</div>
+        </div>
+        <div style="margin-top:14px;display:flex;gap:10px">
+          <button class="btn btn-ghost btn-sm" onclick="closeModal('modal-firebase');document.getElementById('modal-firebase').classList.add('open')">⚙ Reconfigurar Firebase</button>
+        </div>
+      </div>
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:20px">
+        <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:8px">📊 Estatísticas do Banco</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:13px">
+          ${[['Cotações',state.cotacoes.length],['Pedidos',state.pedidos.length],['Propostas',state.propostas.length],['Fornecedores',state.fornecedores.length],['Produtos',state.produtos.length]].map(([l,v])=>
+            `<div style="background:var(--bg3);border:1px solid var(--border);border-radius:4px;padding:10px 14px;display:flex;justify-content:space-between"><span style="color:var(--text2)">${l}</span><span style="color:var(--accent);font-family:'Space Mono',monospace;font-weight:700">${v}</span></div>`
+          ).join('')}
+        </div>
+      </div>
+      <div style="background:var(--red-dim);border:1px solid rgba(239,68,68,0.3);border-radius:var(--radius);padding:20px">
+        <div style="font-size:14px;font-weight:700;color:var(--red);margin-bottom:8px">⚠️ Zona de Perigo</div>
+        <p style="font-size:13px;color:var(--text3);margin-bottom:12px">Limpar o cache local apaga dados salvos no navegador (backup local). Os dados no Firebase não são afetados.</p>
+        <button class="btn btn-danger btn-sm" onclick="if(confirm('Limpar cache local?')){localStorage.removeItem('engpro_state');showToast('Cache local limpo.');}">🗑 Limpar Cache Local</button>
+      </div>
+    </div>`;
+}
+
+// ---- TOAST ----
+function showToast(msg, isError=false) {
+  const existing = document.getElementById('engpro-toast');
+  if (existing) existing.remove();
+  const t = document.createElement('div');
+  t.id = 'engpro-toast';
+  t.style.cssText = `position:fixed;bottom:28px;right:28px;z-index:99999;background:${isError?'var(--red)':'var(--green)'};color:#fff;padding:12px 20px;border-radius:8px;font-size:14px;font-weight:600;font-family:'Barlow',sans-serif;box-shadow:0 8px 24px rgba(0,0,0,0.4);animation:fadeIn 0.2s ease;max-width:320px`;
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 3200);
 }
 
 // ============================================================
@@ -1645,13 +2308,44 @@ function initFirebase(cfg) {
     db = firebase.firestore();
 
     // AUTH STATE LISTENER — controls login screen visibility
-    firebase.auth().onAuthStateChanged(user => {
+    firebase.auth().onAuthStateChanged(async user => {
       if (user) {
-        showApp(user);
-        startFirestoreListeners();
+        try {
+          const doc = await db.collection('usuarios').doc(user.uid).get();
+          if (!doc.exists) {
+            // User exists in Auth but not in Firestore — sign out
+            await firebase.auth().signOut();
+            return;
+          }
+          const profile = doc.data();
+          // Update last login
+          db.collection('usuarios').doc(user.uid).update({ ultimoLogin: new Date().toISOString() }).catch(()=>{});
+
+          if (profile.status === 'pendente') {
+            await firebase.auth().signOut();
+            showAuthMsg('login-error', '⏳ Sua conta está aguardando aprovação do administrador.');
+            const btn = document.getElementById('btn-login');
+            if (btn) { btn.disabled = false; btn.textContent = 'Entrar no Sistema'; }
+            return;
+          }
+          if (profile.status === 'bloqueado') {
+            await firebase.auth().signOut();
+            showAuthMsg('login-error', '🚫 Sua conta foi bloqueada. Entre em contato com o administrador.');
+            const btn = document.getElementById('btn-login');
+            if (btn) { btn.disabled = false; btn.textContent = 'Entrar no Sistema'; }
+            return;
+          }
+          showApp(user, profile);
+          startFirestoreListeners();
+        } catch(e) {
+          console.error('Profile check error:', e);
+          // Fallback: allow login without profile check
+          showApp(user, { role:'operador', status:'ativo', permissions: DEFAULT_PERMISSIONS.operador });
+          startFirestoreListeners();
+        }
       } else {
+        if (adminUser) return; // admin logged in via admin panel — don't redirect
         showLogin();
-        // stop Firestore listeners when logged out
         fbUnsubscribers.forEach(u => u());
         fbUnsubscribers = [];
         setStatus(false);
