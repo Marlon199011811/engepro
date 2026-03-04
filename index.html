@@ -9,6 +9,7 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
   :root {
     --bg: #0d0f14;
@@ -436,6 +437,107 @@
   ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
   ::-webkit-scrollbar-thumb:hover { background: var(--text3); }
 
+  /* FILE ATTACHMENT */
+  .file-drop {
+    border: 2px dashed var(--border2); border-radius: var(--radius);
+    padding: 16px; text-align: center; cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    background: var(--bg3);
+  }
+  .file-drop:hover, .file-drop.drag-over { border-color: var(--accent); background: var(--accent-dim); }
+  .file-drop input[type=file] { display: none; }
+  .file-drop-icon { font-size: 24px; margin-bottom: 6px; }
+  .file-drop-label { font-size: 13px; color: var(--text3); }
+  .file-drop-label strong { color: var(--accent); cursor: pointer; }
+  .file-attached {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 10px; background: var(--green-dim);
+    border: 1px solid rgba(16,185,129,0.3); border-radius: var(--radius);
+    padding: 10px 14px; margin-top: 8px;
+  }
+  .file-attached-name { font-size: 13px; color: var(--green); font-weight: 600; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .file-attached-size { font-size: 11px; color: var(--text3); font-family: 'Space Mono', monospace; }
+  .file-remove { background: none; border: none; color: var(--red); cursor: pointer; font-size: 18px; line-height: 1; }
+
+  /* PRODUCT PICKER MODAL */
+  .picker-list { max-height: 320px; overflow-y: auto; }
+  .picker-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 16px; cursor: pointer; border-bottom: 1px solid var(--border);
+    transition: background 0.1s;
+  }
+  .picker-item:last-child { border-bottom: none; }
+  .picker-item:hover { background: var(--accent-dim); }
+  .picker-item-code {
+    font-family: 'Space Mono', monospace; font-size: 11px;
+    color: var(--accent); background: var(--accent-dim);
+    padding: 2px 7px; border-radius: 4px; flex-shrink: 0;
+  }
+  .picker-item-desc { font-size: 13px; color: var(--text); font-weight: 500; flex: 1; }
+  .picker-item-un { font-size: 11px; color: var(--text3); font-family: 'Space Mono', monospace; }
+  .picker-item-cat { font-size: 11px; color: var(--text3); }
+  .picker-empty { padding: 32px; text-align: center; color: var(--text3); font-size: 13px; }
+
+  /* ============================================================
+     REPORTS
+  ============================================================ */
+  .report-tabs {
+    display: flex; gap: 4px; margin-bottom: 20px;
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 6px; flex-wrap: wrap;
+  }
+  .report-tab {
+    padding: 8px 16px; border-radius: 4px; cursor: pointer;
+    font-size: 13px; font-weight: 600; color: var(--text3);
+    transition: all 0.15s; border: none; background: none;
+    font-family: 'Barlow', sans-serif; white-space: nowrap;
+  }
+  .report-tab:hover { color: var(--text2); background: var(--bg3); }
+  .report-tab.active { background: var(--accent); color: #000; }
+
+  .report-filters {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 18px 20px;
+    margin-bottom: 20px;
+  }
+  .report-filters-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px;
+    align-items: end;
+  }
+  .report-filters-grid .field label { font-size: 10px; }
+  .report-filters-grid .field input,
+  .report-filters-grid .field select {
+    padding: 8px 10px; font-size: 13px;
+  }
+
+  .report-summary {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px;
+    margin-bottom: 20px;
+  }
+  .rsum-card {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 16px 18px;
+    border-left: 3px solid var(--accent);
+  }
+  .rsum-label { font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text3); font-family: 'Space Mono', monospace; }
+  .rsum-val { font-size: 26px; font-weight: 800; color: var(--accent); font-family: 'Barlow Condensed', sans-serif; margin: 4px 0 2px; }
+  .rsum-card.green { border-left-color: var(--green); }
+  .rsum-card.green .rsum-val { color: var(--green); }
+  .rsum-card.blue { border-left-color: var(--blue); }
+  .rsum-card.blue .rsum-val { color: var(--blue); }
+  .rsum-card.red { border-left-color: var(--red); }
+  .rsum-card.red .rsum-val { color: var(--red); }
+
+  .report-toolbar {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 12px; flex-wrap: wrap; gap: 10px;
+  }
+  .report-count { font-size: 12px; color: var(--text3); font-family: 'Space Mono', monospace; }
+  .export-btns { display: flex; gap: 8px; }
+
+  .report-panel { display: none; }
+  .report-panel.active { display: block; }
+
   /* ============================================================
      LOGIN SCREEN
   ============================================================ */
@@ -763,6 +865,10 @@
     <div class="nav-item" onclick="navigate('produtos')">
       <span class="icon">📦</span> Produtos / Itens
     </div>
+    <div class="nav-section">Relatórios</div>
+    <div class="nav-item" onclick="navigate('relatorios')">
+      <span class="icon">📊</span> Relatórios
+    </div>
   </div>
   <div class="sidebar-footer">
     <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px">
@@ -958,6 +1064,51 @@
       </div>
     </div>
 
+    <!-- RELATÓRIOS -->
+    <div class="view" id="view-relatorios">
+
+      <!-- REPORT TYPE TABS -->
+      <div class="report-tabs">
+        <button class="report-tab active" id="rtab-cotacoes" onclick="switchReportTab('cotacoes')">📋 Cotações</button>
+        <button class="report-tab" id="rtab-pedidos"   onclick="switchReportTab('pedidos')">🛒 Pedidos de Compra</button>
+        <button class="report-tab" id="rtab-propostas" onclick="switchReportTab('propostas')">💰 Propostas</button>
+        <button class="report-tab" id="rtab-fornecedores" onclick="switchReportTab('fornecedores')">🏭 Fornecedores</button>
+        <button class="report-tab" id="rtab-produtos"  onclick="switchReportTab('produtos')">📦 Produtos</button>
+      </div>
+
+      <!-- FILTERS PANEL -->
+      <div class="report-filters">
+        <div class="report-filters-grid" id="report-filters-grid">
+          <!-- Filled dynamically per tab -->
+        </div>
+      </div>
+
+      <!-- SUMMARY CARDS -->
+      <div class="report-summary" id="report-summary"></div>
+
+      <!-- TABLE -->
+      <div class="report-toolbar">
+        <span class="report-count" id="report-count">0 registros</span>
+        <div class="export-btns">
+          <button class="btn btn-success" onclick="exportExcel()">
+            <span>📥</span> Exportar Excel
+          </button>
+          <button class="btn btn-ghost" onclick="exportCSV()">
+            <span>📄</span> Exportar CSV
+          </button>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <div id="report-table-wrap" style="overflow-x:auto">
+          <table id="report-table">
+            <thead id="report-thead"></thead>
+            <tbody id="report-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </div><!-- /view-relatorios -->
+
   </div><!-- /content -->
 </div><!-- /main -->
 
@@ -1001,11 +1152,12 @@
         <div class="section-title">📦 Itens da Cotação</div>
         <div class="items-table-wrap">
           <table>
-            <thead><tr><th>Item</th><th>Qtd</th><th>Unidade</th><th>Especificação</th><th></th></tr></thead>
+            <thead><tr><th>Cód.</th><th>Item / Descrição</th><th>Qtd</th><th>Unidade</th><th>Especificação</th><th></th></tr></thead>
             <tbody id="cotacao-items"></tbody>
           </table>
-          <div class="add-item-row">
-            <button class="btn btn-ghost btn-sm" onclick="addCotacaoItem()">+ Adicionar Item</button>
+          <div class="add-item-row" style="display:flex;gap:8px">
+            <button class="btn btn-ghost btn-sm" onclick="addCotacaoItem()">+ Digitar manualmente</button>
+            <button class="btn btn-ghost btn-sm" style="color:var(--accent);border-color:var(--accent)" onclick="openPickerFor('cotacao')">📦 Selecionar do Catálogo</button>
           </div>
         </div>
       </div>
@@ -1061,6 +1213,24 @@
         <div class="field form-full">
           <label>Observações</label>
           <textarea id="p-obs" placeholder="Observações da proposta..."></textarea>
+        </div>
+        <div class="field form-full">
+          <label>📎 Anexar Proposta (PDF, DOC, imagem)</label>
+          <div class="file-drop" id="p-file-drop"
+            ondragover="event.preventDefault();this.classList.add('drag-over')"
+            ondragleave="this.classList.remove('drag-over')"
+            ondrop="handleFileDrop(event)"
+            onclick="document.getElementById('p-file-input').click()">
+            <input type="file" id="p-file-input" accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png" onchange="handleFileSelect(this.files[0])">
+            <div class="file-drop-icon">📎</div>
+            <div class="file-drop-label">Arraste o arquivo aqui ou <strong>clique para selecionar</strong></div>
+            <div class="file-drop-label" style="font-size:11px;margin-top:3px">PDF, DOC, DOCX, XLS, JPG, PNG · Máx. 2 MB</div>
+          </div>
+          <div class="file-attached" id="p-file-preview" style="display:none">
+            <span class="file-attached-name" id="p-file-name"></span>
+            <span class="file-attached-size" id="p-file-size"></span>
+            <button class="file-remove" onclick="clearAnexo()" title="Remover arquivo">×</button>
+          </div>
         </div>
       </div>
       <div class="items-section">
@@ -1126,11 +1296,14 @@
         <div class="section-title">📦 Itens do Pedido</div>
         <div class="items-table-wrap">
           <table>
-            <thead><tr><th>Descrição</th><th>Qtd</th><th>Un</th><th>Preço Unit (R$)</th><th>Total</th><th></th></tr></thead>
+            <thead><tr><th>Cód.</th><th>Descrição</th><th>Qtd</th><th>Un</th><th>Preço Unit (R$)</th><th>Total</th><th></th></tr></thead>
             <tbody id="pedido-items"></tbody>
           </table>
           <div class="add-item-row" style="display:flex;justify-content:space-between;align-items:center">
-            <button class="btn btn-ghost btn-sm" onclick="addPedidoItem()">+ Adicionar Item</button>
+            <div style="display:flex;gap:8px">
+              <button class="btn btn-ghost btn-sm" onclick="addPedidoItem()">+ Digitar manualmente</button>
+              <button class="btn btn-ghost btn-sm" style="color:var(--accent);border-color:var(--accent)" onclick="openPickerFor('pedido')">📦 Selecionar do Catálogo</button>
+            </div>
             <span style="font-family:'Space Mono',monospace;font-size:13px;color:var(--accent)">
               Total: R$ <span id="ped-total">0,00</span>
             </span>
@@ -1203,6 +1376,28 @@
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="closeModal('modal-produto')">Cancelar</button>
       <button class="btn btn-primary" onclick="saveProduto()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL PRODUTO PICKER -->
+<div class="modal-overlay" id="modal-produto-picker">
+  <div class="modal" style="max-width:520px">
+    <div class="modal-header">
+      <div class="modal-title">📦 Selecionar Item do Catálogo</div>
+      <button class="modal-close" onclick="closeModal('modal-produto-picker')">×</button>
+    </div>
+    <div class="modal-body" style="padding:0">
+      <div style="padding:14px 16px;border-bottom:1px solid var(--border)">
+        <div class="search-box">
+          <span>🔍</span>
+          <input type="text" id="picker-search" placeholder="Buscar por código ou descrição..." oninput="renderPickerList()" autocomplete="off">
+        </div>
+      </div>
+      <div class="picker-list" id="picker-list"></div>
+    </div>
+    <div class="modal-footer" style="justify-content:flex-start">
+      <span style="font-size:12px;color:var(--text3)">Clique no item para inserir na linha</span>
     </div>
   </div>
 </div>
@@ -1587,7 +1782,7 @@ function badgeClass(s) {
 // ============================================================
 // NAVIGATION
 // ============================================================
-const titles = {dashboard:'Dashboard',cotacoes:'Cotações',comparar:'Comparar Propostas',pedidos:'Pedidos de Compra',fornecedores:'Fornecedores',produtos:'Produtos / Itens'};
+const titles = {dashboard:'Dashboard',cotacoes:'Cotações',comparar:'Comparar Propostas',pedidos:'Pedidos de Compra',fornecedores:'Fornecedores',produtos:'Produtos / Itens',relatorios:'Relatórios'};
 function navigate(view) {
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
@@ -1601,6 +1796,7 @@ function navigate(view) {
   if (view==='pedidos') renderPedidos();
   if (view==='fornecedores') renderFornecedores();
   if (view==='produtos') renderProdutos();
+  if (view==='relatorios') initReports();
 }
 
 // ============================================================
@@ -1661,10 +1857,13 @@ function addCotacaoItem(it) {
   const n = cotacaoItemCount;
   const row = document.createElement('tr');
   row.id = 'citem-'+n;
-  row.innerHTML = `<td><input placeholder="Descrição" value="${it?it.desc||'':''}" style="width:180px"></td>
-    <td><input type="number" min="0" value="${it?it.qty||'':''}" style="width:60px" placeholder="1"></td>
-    <td><input placeholder="UN" value="${it?it.un||'':''}" style="width:50px"></td>
-    <td><input placeholder="Detalhes técnicos" value="${it?it.spec||'':''}" style="width:160px"></td>
+  row.dataset.prodId = it?.prodId||'';
+  row.innerHTML = `
+    <td><span class="picker-item-code" style="font-size:10px">${it?.codigo||'—'}</span></td>
+    <td><input placeholder="Descrição do item" value="${it?it.desc||'':''}" style="width:170px"></td>
+    <td><input type="number" min="0" value="${it?it.qty||'':''}" style="width:55px" placeholder="1"></td>
+    <td><input placeholder="UN" value="${it?it.un||'':''}" style="width:48px"></td>
+    <td><input placeholder="Detalhes técnicos" value="${it?it.spec||'':''}" style="width:150px"></td>
     <td><button onclick="this.closest('tr').remove()" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:16px">×</button></td>`;
   document.getElementById('cotacao-items').appendChild(row);
 }
@@ -1675,7 +1874,9 @@ function saveCotacao() {
   const items = [];
   document.querySelectorAll('#cotacao-items tr').forEach(tr => {
     const ins = tr.querySelectorAll('input');
-    if(ins[0].value) items.push({desc:ins[0].value,qty:ins[1].value,un:ins[2].value,spec:ins[3].value});
+    const codeEl = tr.querySelector('.picker-item-code');
+    const codigo = codeEl ? codeEl.textContent.replace('—','').trim() : '';
+    if(ins[0].value) items.push({codigo, desc:ins[0].value, qty:ins[1].value, un:ins[2].value, spec:ins[3].value, prodId:tr.dataset.prodId||''});
   });
   const fornSel = [...document.querySelectorAll('#fornecedores-check input:checked')].map(i=>i.value);
   const id = state.editingId || uid();
@@ -1754,6 +1955,7 @@ function openModalPropostaFor(cotacaoId) {
   document.getElementById('p-validade').value = '';
   document.getElementById('p-cond').value = '';
   document.getElementById('p-obs').value = '';
+  clearAnexo();
   openModal('modal-proposta');
 }
 function populatePropostaSelects() {
@@ -1807,6 +2009,7 @@ function saveProposta() {
     prazoEntrega: document.getElementById('p-prazo').value,
     condPagamento: document.getElementById('p-cond').value,
     obs: document.getElementById('p-obs').value,
+    anexo: propostaAnexo ? { nome: propostaAnexo.nome, tipo: propostaAnexo.tipo, tamanho: propostaAnexo.tamanho, dados: propostaAnexo.dados } : null,
     itens: itensProposta, total,
     criadoEm: new Date().toISOString()
   };
@@ -1858,8 +2061,9 @@ function renderComparar() {
             ${(p.itens||[]).map(it=>`<div style="display:flex;justify-content:space-between;padding:2px 0">
               <span>${it.desc}</span><span style="color:var(--text2)">R$ ${fmtMoney(it.preco)}</span></div>`).join('')}
           </div>
-          <div style="margin-top:12px;display:flex;gap:8px">
+          <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
             <button class="btn btn-success btn-sm" onclick="gerarPedidoDaProposta('${p.id}')">Gerar Pedido</button>
+            ${p.anexo ? `<button class="btn btn-ghost btn-sm" style="color:var(--blue);border-color:var(--blue)" onclick="viewAnexo('${p.anexo.dados}','${p.anexo.nome}')">📎 ${p.anexo.nome}</button>` : ''}
             <button class="btn btn-danger btn-sm" onclick="deleteProposta('${p.id}')">Excluir</button>
           </div>
         </div>`).join('')}
@@ -1943,24 +2147,27 @@ function addPedidoItem(it) {
   const n = pedidoItemCount;
   const row = document.createElement('tr');
   row.id = 'pitem-'+n;
+  row.dataset.prodId = it?.prodId||'';
   row.innerHTML = `
-    <td><input placeholder="Descrição do item" value="${it?it.desc||'':''}" style="width:160px" oninput="calcPedidoTotal()"></td>
-    <td><input type="number" min="0" value="${it?it.qty||'':''}" style="width:55px" placeholder="1" id="piq-${n}" oninput="calcPedidoTotal()"></td>
-    <td><input value="${it?it.un||'UN':''}" style="width:45px" oninput="calcPedidoTotal()"></td>
-    <td><input type="number" step="0.01" min="0" value="${it?it.preco||'':''}" style="width:90px" placeholder="0,00" id="pip-${n}" oninput="calcPedidoTotal()"></td>
+    <td><span class="picker-item-code" style="font-size:10px">${it?.codigo||'—'}</span></td>
+    <td><input placeholder="Descrição do item" value="${it?it.desc||'':''}" style="width:150px" oninput="calcPedidoTotal()"></td>
+    <td><input type="number" min="0" value="${it?it.qty||'':''}" style="width:50px" placeholder="1" id="piq-${n}" oninput="calcPedidoTotal()"></td>
+    <td><input value="${it?it.un||'UN':''}" style="width:42px" oninput="calcPedidoTotal()"></td>
+    <td><input type="number" step="0.01" min="0" value="${it?it.preco||'':''}" style="width:85px" placeholder="0,00" id="pip-${n}" oninput="calcPedidoTotal()"></td>
     <td class="mono" id="pit-${n}">R$ ${it?fmtMoney((it.preco||0)*(it.qty||1)):'0,00'}</td>
     <td><button onclick="this.closest('tr').remove();calcPedidoTotal()" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:16px">×</button></td>`;
   document.getElementById('pedido-items').appendChild(row);
 }
 function calcPedidoTotal() {
   let total = 0;
-  document.querySelectorAll('#pedido-items tr').forEach((tr,i) => {
+  document.querySelectorAll('#pedido-items tr').forEach((tr) => {
     const ins = tr.querySelectorAll('input');
     if (ins.length < 4) return;
+    // ins[0]=desc, ins[1]=qty, ins[2]=un, ins[3]=price
     const q = parseFloat(ins[1].value||0);
     const p = parseFloat(ins[3].value||0);
     const t = q*p;
-    const tcel = tr.querySelector('td:nth-child(5)');
+    const tcel = tr.querySelector('td:nth-child(6)');
     if(tcel) tcel.textContent = 'R$ '+fmtMoney(t);
     total += t;
   });
@@ -1973,9 +2180,11 @@ function savePedido() {
   const itens = [];
   document.querySelectorAll('#pedido-items tr').forEach(tr=>{
     const ins = tr.querySelectorAll('input');
+    const codeEl = tr.querySelector('.picker-item-code');
+    const codigo = codeEl ? codeEl.textContent.replace('—','').trim() : '';
     if (ins.length >= 4 && ins[0].value) {
       const q=parseFloat(ins[1].value||1), p=parseFloat(ins[3].value||0);
-      itens.push({desc:ins[0].value,qty:q,un:ins[2].value||'UN',preco:p,total:q*p});
+      itens.push({codigo,desc:ins[0].value,qty:q,un:ins[2].value||'UN',preco:p,total:q*p,prodId:tr.dataset.prodId||''});
     }
   });
   const total = itens.reduce((a,b)=>a+b.total,0);
@@ -2263,6 +2472,422 @@ function renderDashboard() {
 function updateBadges() {
   document.getElementById('badge-cotacoes').textContent = state.cotacoes.filter(c=>c.status==='Aberta').length;
   document.getElementById('badge-pedidos').textContent = state.pedidos.filter(p=>p.status==='Pendente').length;
+}
+
+// ============================================================
+// REPORTS
+// ============================================================
+let currentReportTab = 'cotacoes';
+let reportRows = []; // current filtered data for export
+
+const REPORT_CONFIGS = {
+  cotacoes: {
+    label: 'Cotações',
+    filters: [
+      { id:'rf-status', label:'Status', type:'select', options:['','Aberta','Comparando','Aprovada','Encerrada'] },
+      { id:'rf-solicitante', label:'Solicitante', type:'text', placeholder:'Buscar...' },
+      { id:'rf-data-ini', label:'Data Abertura (de)', type:'date' },
+      { id:'rf-data-fim', label:'Data Abertura (até)', type:'date' },
+    ],
+    columns: ['Nº Requisição','Descrição','Solicitante','Data Abertura','Prazo','Status','Qtd Itens','Qtd Propostas'],
+    getData: (f) => {
+      return state.cotacoes.filter(c => {
+        if (f.status && c.status !== f.status) return false;
+        if (f.solicitante && !(c.sol||'').toLowerCase().includes(f.solicitante.toLowerCase())) return false;
+        if (f.dataIni && c.data < f.dataIni) return false;
+        if (f.dataFim && c.data > f.dataFim) return false;
+        return true;
+      }).map(c => ({
+        obj: c,
+        row: [
+          c.req, c.desc, c.sol||'', fmtDate(c.data), fmtDate(c.prazo), c.status,
+          (c.items||[]).length,
+          state.propostas.filter(p=>p.cotacaoId===c.id).length
+        ]
+      }));
+    },
+    summary: (data) => [
+      { label:'Total', val: data.length, color:'' },
+      { label:'Abertas', val: data.filter(d=>d.obj.status==='Aberta').length, color:'' },
+      { label:'Comparando', val: data.filter(d=>d.obj.status==='Comparando').length, color:'blue' },
+      { label:'Aprovadas', val: data.filter(d=>d.obj.status==='Aprovada').length, color:'green' },
+    ]
+  },
+  pedidos: {
+    label: 'Pedidos de Compra',
+    filters: [
+      { id:'rf-status', label:'Status', type:'select', options:['','Pendente','Aprovado','Enviado ao Fornecedor','Recebido','Cancelado'] },
+      { id:'rf-fornecedor', label:'Fornecedor', type:'text', placeholder:'Buscar...' },
+      { id:'rf-data-ini', label:'Data Pedido (de)', type:'date' },
+      { id:'rf-data-fim', label:'Data Pedido (até)', type:'date' },
+    ],
+    columns: ['Nº Pedido','Fornecedor','Cotação Ref.','Data','Prazo Entrega','Cond. Pagamento','Centro Custo','Valor Total (R$)','Status'],
+    getData: (f) => {
+      return state.pedidos.filter(p => {
+        if (f.status && p.status !== f.status) return false;
+        if (f.fornecedor && !p.fornecedorNome.toLowerCase().includes(f.fornecedor.toLowerCase())) return false;
+        if (f.dataIni && p.data < f.dataIni) return false;
+        if (f.dataFim && p.data > f.dataFim) return false;
+        return true;
+      }).map(p => ({
+        obj: p,
+        row: [
+          p.num, p.fornecedorNome, p.cotacaoRef||'', fmtDate(p.data),
+          fmtDate(p.prazoEntrega), p.condPagamento||'', p.centroCusto||'',
+          fmtMoney(p.total), p.status
+        ]
+      }));
+    },
+    summary: (data) => {
+      const total = data.reduce((a,d)=>a+parseFloat(d.obj.total||0),0);
+      return [
+        { label:'Total Pedidos', val: data.length, color:'' },
+        { label:'Pendentes', val: data.filter(d=>d.obj.status==='Pendente').length, color:'' },
+        { label:'Recebidos', val: data.filter(d=>d.obj.status==='Recebido').length, color:'green' },
+        { label:'Valor Total', val: 'R$ '+fmtMoney(total), color:'blue' },
+      ];
+    }
+  },
+  propostas: {
+    label: 'Propostas',
+    filters: [
+      { id:'rf-fornecedor', label:'Fornecedor', type:'text', placeholder:'Buscar...' },
+      { id:'rf-cotacao', label:'Cotação', type:'text', placeholder:'Nº requisição...' },
+      { id:'rf-data-ini', label:'Data Proposta (de)', type:'date' },
+      { id:'rf-data-fim', label:'Data Proposta (até)', type:'date' },
+    ],
+    columns: ['Fornecedor','Cotação','Data Proposta','Validade','Prazo Entrega (dias)','Cond. Pagamento','Total (R$)','Qtd Itens','Tem Anexo'],
+    getData: (f) => {
+      return state.propostas.filter(p => {
+        if (f.fornecedor && !p.fornecedorNome.toLowerCase().includes(f.fornecedor.toLowerCase())) return false;
+        if (f.cotacao) {
+          const cot = state.cotacoes.find(c=>c.id===p.cotacaoId);
+          if (!cot || !(cot.req||'').toLowerCase().includes(f.cotacao.toLowerCase())) return false;
+        }
+        if (f.dataIni && p.data < f.dataIni) return false;
+        if (f.dataFim && p.data > f.dataFim) return false;
+        return true;
+      }).map(p => {
+        const cot = state.cotacoes.find(c=>c.id===p.cotacaoId);
+        return {
+          obj: p,
+          row: [
+            p.fornecedorNome, cot?cot.req:'', fmtDate(p.data),
+            fmtDate(p.validade), p.prazoEntrega||'', p.condPagamento||'',
+            fmtMoney(p.total), (p.itens||[]).length, p.anexo?'Sim':'Não'
+          ]
+        };
+      });
+    },
+    summary: (data) => {
+      const total = data.reduce((a,d)=>a+parseFloat(d.obj.total||0),0);
+      return [
+        { label:'Total Propostas', val: data.length, color:'' },
+        { label:'Com Anexo', val: data.filter(d=>d.obj.anexo).length, color:'blue' },
+        { label:'Fornecedores', val: new Set(data.map(d=>d.obj.fornecedorId)).size, color:'green' },
+        { label:'Valor Total', val: 'R$ '+fmtMoney(total), color:'blue' },
+      ];
+    }
+  },
+  fornecedores: {
+    label: 'Fornecedores',
+    filters: [
+      { id:'rf-categoria', label:'Categoria', type:'select', options:['','Materiais de Construção','Elétrico','Hidráulico','Ferramentas','EPIs / Segurança','Serviços','Outros'] },
+      { id:'rf-nome', label:'Nome / Razão Social', type:'text', placeholder:'Buscar...' },
+      { id:'rf-dummy1', label:'', type:'empty' },
+      { id:'rf-dummy2', label:'', type:'empty' },
+    ],
+    columns: ['Código','Razão Social','CNPJ','Categoria','Contato','E-mail','Telefone','Qtd Pedidos','Valor Total Comprado (R$)'],
+    getData: (f) => {
+      return state.fornecedores.filter(fo => {
+        if (f.categoria && fo.categoria !== f.categoria) return false;
+        if (f.nome && !fo.nome.toLowerCase().includes(f.nome.toLowerCase())) return false;
+        return true;
+      }).map(fo => {
+        const peds = state.pedidos.filter(p=>p.fornecedorId===fo.id && p.status!=='Cancelado');
+        const valorTotal = peds.reduce((a,p)=>a+(p.total||0),0);
+        return {
+          obj: fo,
+          row: [fo.codigo||'', fo.nome, fo.cnpj||'', fo.categoria||'', fo.contato||'', fo.email||'', fo.telefone||'', peds.length, fmtMoney(valorTotal)]
+        };
+      });
+    },
+    summary: (data) => [
+      { label:'Total Fornecedores', val: data.length, color:'' },
+      { label:'Com Pedidos', val: data.filter(d=>{ const p=state.pedidos.filter(x=>x.fornecedorId===d.obj.id); return p.length>0; }).length, color:'green' },
+      { label:'Categorias', val: new Set(data.map(d=>d.obj.categoria).filter(Boolean)).size, color:'blue' },
+      { label:'Maior Volume', val: data.length ? data.sort((a,b)=>parseFloat(b.row[8].replace(/\./g,'').replace(',','.'))-parseFloat(a.row[8].replace(/\./g,'').replace(',','.'))).slice(0,1).map(d=>d.obj.nome.split(' ')[0])[0]||'—' : '—', color:'' },
+    ]
+  },
+  produtos: {
+    label: 'Produtos / Itens',
+    filters: [
+      { id:'rf-categoria', label:'Categoria', type:'select', options:['','Materiais de Construção','Elétrico','Hidráulico','Ferramentas','EPIs / Segurança','Outros'] },
+      { id:'rf-unidade', label:'Unidade', type:'select', options:['','UN','KG','M','M²','M³','L','CX','PC','SV'] },
+      { id:'rf-nome', label:'Descrição', type:'text', placeholder:'Buscar...' },
+      { id:'rf-dummy1', label:'', type:'empty' },
+    ],
+    columns: ['Código','Descrição','Unidade','Categoria','Qtd em Cotações','Qtd em Pedidos'],
+    getData: (f) => {
+      return state.produtos.filter(pr => {
+        if (f.categoria && pr.categoria !== f.categoria) return false;
+        if (f.unidade && pr.un !== f.unidade) return false;
+        if (f.nome && !pr.desc.toLowerCase().includes(f.nome.toLowerCase())) return false;
+        return true;
+      }).map(pr => {
+        const inCotacoes = state.cotacoes.reduce((a,c)=>{
+          return a + ((c.items||[]).filter(it=>it.prodId===pr.id).length);
+        },0);
+        const inPedidos = state.pedidos.reduce((a,p)=>{
+          return a + ((p.itens||[]).filter(it=>it.prodId===pr.id).length);
+        },0);
+        return { obj: pr, row: [pr.codigo||'', pr.desc, pr.un, pr.categoria||'', inCotacoes, inPedidos] };
+      });
+    },
+    summary: (data) => [
+      { label:'Total Itens', val: data.length, color:'' },
+      { label:'Categorias', val: new Set(data.map(d=>d.obj.categoria).filter(Boolean)).size, color:'blue' },
+      { label:'Mais Cotado', val: data.length ? [...data].sort((a,b)=>b.row[4]-a.row[4])[0].obj.desc.slice(0,14)+(data[0].obj.desc.length>14?'…':'') : '—', color:'green' },
+      { label:'Mais Pedido', val: data.length ? [...data].sort((a,b)=>b.row[5]-a.row[5])[0].obj.desc.slice(0,14)+(data[0].obj.desc.length>14?'…':'') : '—', color:'' },
+    ]
+  }
+};
+
+function getReportFilters() {
+  const f = {};
+  const cfg = REPORT_CONFIGS[currentReportTab];
+  cfg.filters.forEach(fl => {
+    const el = document.getElementById(fl.id);
+    if (!el) return;
+    const key = fl.id.replace('rf-','').replace('-','');
+    // map ids to logical keys
+    const keyMap = {'rfstatus':'status','rfsolicitante':'solicitante','rffornecedor':'fornecedor','rfcotacao':'cotacao',
+      'rfcategoria':'categoria','rfunidade':'unidade','rfnome':'nome','rfdataini':'dataIni','rfdatafim':'dataFim'};
+    f[keyMap[fl.id.replace(/-/g,'')] || fl.id] = el.value;
+  });
+  return f;
+}
+
+function renderReportFilters() {
+  const cfg = REPORT_CONFIGS[currentReportTab];
+  const grid = document.getElementById('report-filters-grid');
+  grid.innerHTML = cfg.filters.map(fl => {
+    if (fl.type === 'empty') return `<div></div>`;
+    if (fl.type === 'select') {
+      return `<div class="field">
+        <label>${fl.label}</label>
+        <select id="${fl.id}" onchange="renderReport()" class="filter-select" style="width:100%;padding:8px 10px">
+          ${fl.options.map(o=>`<option value="${o}">${o||'Todos'}</option>`).join('')}
+        </select>
+      </div>`;
+    }
+    return `<div class="field">
+      <label>${fl.label}</label>
+      <input id="${fl.id}" type="${fl.type}" placeholder="${fl.placeholder||''}" oninput="renderReport()" style="width:100%">
+    </div>`;
+  }).join('') +
+  `<div class="field" style="display:flex;align-items:flex-end">
+    <button class="btn btn-ghost" onclick="clearReportFilters()" style="width:100%">🔄 Limpar Filtros</button>
+  </div>`;
+}
+
+function clearReportFilters() {
+  const cfg = REPORT_CONFIGS[currentReportTab];
+  cfg.filters.forEach(fl => {
+    const el = document.getElementById(fl.id);
+    if (el) el.value = '';
+  });
+  renderReport();
+}
+
+function switchReportTab(tab) {
+  currentReportTab = tab;
+  Object.keys(REPORT_CONFIGS).forEach(k => {
+    const btn = document.getElementById('rtab-'+k);
+    if (btn) btn.classList.toggle('active', k === tab);
+  });
+  renderReportFilters();
+  renderReport();
+}
+
+function renderReport() {
+  const cfg = REPORT_CONFIGS[currentReportTab];
+  const filters = getReportFilters();
+  const data = cfg.getData(filters);
+  reportRows = data;
+
+  // Summary cards
+  const sumCards = cfg.summary(data);
+  document.getElementById('report-summary').innerHTML = sumCards.map(s=>
+    `<div class="rsum-card ${s.color}">
+      <div class="rsum-label">${s.label}</div>
+      <div class="rsum-val">${s.val}</div>
+    </div>`
+  ).join('');
+
+  // Count
+  document.getElementById('report-count').textContent = `${data.length} registro${data.length!==1?'s':''}`;
+
+  // Table header
+  document.getElementById('report-thead').innerHTML =
+    `<tr>${cfg.columns.map(c=>`<th>${c}</th>`).join('')}</tr>`;
+
+  // Table body
+  if (!data.length) {
+    document.getElementById('report-tbody').innerHTML =
+      `<tr><td colspan="${cfg.columns.length}"><div class="empty-state"><div class="empty-icon">📊</div><p>Nenhum dado encontrado com os filtros selecionados</p></div></td></tr>`;
+    return;
+  }
+  document.getElementById('report-tbody').innerHTML = data.map(d =>
+    `<tr>${d.row.map((cell,ci) => {
+      // Status column styling
+      if (cfg.columns[ci]==='Status') return `<td><span class="badge ${badgeClass(cell)}">${cell}</span></td>`;
+      if (cfg.columns[ci]==='Tem Anexo') return `<td><span class="badge ${cell==='Sim'?'badge-approved':'badge-pending'}">${cell}</span></td>`;
+      return `<td>${cell}</td>`;
+    }).join('')}</tr>`
+  ).join('');
+}
+
+function initReports() {
+  renderReportFilters();
+  renderReport();
+}
+
+// ============================================================
+// EXCEL / CSV EXPORT
+// ============================================================
+function exportExcel() {
+  if (!reportRows.length) { alert('Nenhum dado para exportar.'); return; }
+  const cfg = REPORT_CONFIGS[currentReportTab];
+  const ws_data = [cfg.columns, ...reportRows.map(d => d.row)];
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.aoa_to_sheet(ws_data);
+
+  // Column widths
+  ws['!cols'] = cfg.columns.map(() => ({ wch: 22 }));
+
+  // Header styling (bold via cell metadata — SheetJS community doesn't support full styles, but we set the range)
+  ws['!autofilter'] = { ref: XLSX.utils.encode_range({s:{r:0,c:0}, e:{r:0,c:cfg.columns.length-1}}) };
+
+  XLSX.utils.book_append_sheet(wb, ws, cfg.label.slice(0,31));
+
+  // Summary sheet
+  const sumData = cfg.summary(reportRows);
+  const ws2 = XLSX.utils.aoa_to_sheet([
+    ['Resumo — ' + cfg.label],
+    ['Gerado em', new Date().toLocaleString('pt-BR')],
+    [''],
+    ['Indicador', 'Valor'],
+    ...sumData.map(s=>[s.label, s.val])
+  ]);
+  ws2['!cols'] = [{wch:28},{wch:28}];
+  XLSX.utils.book_append_sheet(wb, ws2, 'Resumo');
+
+  const filename = `ENGPRO_${cfg.label.replace(/\s/g,'_')}_${new Date().toISOString().slice(0,10)}.xlsx`;
+  XLSX.writeFile(wb, filename);
+}
+
+function exportCSV() {
+  if (!reportRows.length) { alert('Nenhum dado para exportar.'); return; }
+  const cfg = REPORT_CONFIGS[currentReportTab];
+  const rows = [cfg.columns, ...reportRows.map(d => d.row)];
+  const csv = rows.map(r => r.map(cell => `"${String(cell).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const blob = new Blob(['\uFEFF'+csv], {type:'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `ENGPRO_${cfg.label.replace(/\s/g,'_')}_${new Date().toISOString().slice(0,10)}.csv`;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+// ============================================================
+// FILE ATTACHMENT (Proposta)
+// ============================================================
+let propostaAnexo = null; // {nome, tipo, tamanho, dados (base64)}
+
+function handleFileSelect(file) {
+  if (!file) return;
+  if (file.size > 2 * 1024 * 1024) { alert('Arquivo muito grande. Máximo 2 MB.'); return; }
+  const reader = new FileReader();
+  reader.onload = e => {
+    propostaAnexo = { nome: file.name, tipo: file.type, tamanho: file.size, dados: e.target.result };
+    showAnexoPreview();
+  };
+  reader.readAsDataURL(file);
+}
+function handleFileDrop(e) {
+  e.preventDefault();
+  document.getElementById('p-file-drop').classList.remove('drag-over');
+  const file = e.dataTransfer.files[0];
+  if (file) handleFileSelect(file);
+}
+function showAnexoPreview() {
+  if (!propostaAnexo) return;
+  document.getElementById('p-file-name').textContent = propostaAnexo.nome;
+  const kb = (propostaAnexo.tamanho / 1024).toFixed(1);
+  document.getElementById('p-file-size').textContent = kb + ' KB';
+  document.getElementById('p-file-preview').style.display = 'flex';
+  document.getElementById('p-file-drop').style.display = 'none';
+}
+function clearAnexo() {
+  propostaAnexo = null;
+  document.getElementById('p-file-input').value = '';
+  document.getElementById('p-file-preview').style.display = 'none';
+  document.getElementById('p-file-drop').style.display = '';
+}
+function viewAnexo(dados, nome) {
+  // open base64 file in new tab
+  const a = document.createElement('a');
+  a.href = dados; a.download = nome; a.target = '_blank';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+}
+
+// ============================================================
+// PRODUCT PICKER
+// ============================================================
+let pickerTarget = ''; // 'cotacao' | 'pedido'
+
+function openPickerFor(target) {
+  if (!state.produtos.length) {
+    alert('Nenhum produto cadastrado. Cadastre itens na aba "Produtos / Itens" primeiro.');
+    return;
+  }
+  pickerTarget = target;
+  document.getElementById('picker-search').value = '';
+  renderPickerList();
+  openModal('modal-produto-picker');
+}
+
+function renderPickerList() {
+  const q = document.getElementById('picker-search').value.toLowerCase();
+  const list = state.produtos.filter(p =>
+    !q || p.desc.toLowerCase().includes(q) || (p.codigo||'').toLowerCase().includes(q) || (p.categoria||'').toLowerCase().includes(q)
+  );
+  const div = document.getElementById('picker-list');
+  if (!list.length) {
+    div.innerHTML = '<div class="picker-empty">Nenhum item encontrado</div>';
+    return;
+  }
+  div.innerHTML = list.map(p => `
+    <div class="picker-item" onclick="selectPickerItem('${p.id}')">
+      <span class="picker-item-code">${p.codigo||'—'}</span>
+      <span class="picker-item-desc">${p.desc}</span>
+      <span class="picker-item-un">${p.un}</span>
+      <span class="picker-item-cat">${p.categoria}</span>
+    </div>`).join('');
+}
+
+function selectPickerItem(prodId) {
+  const prod = state.produtos.find(x => x.id === prodId);
+  if (!prod) return;
+  if (pickerTarget === 'cotacao') {
+    addCotacaoItem({ codigo: prod.codigo||'', desc: prod.desc, qty: '', un: prod.un, spec: '', prodId: prod.id });
+  } else if (pickerTarget === 'pedido') {
+    addPedidoItem({ codigo: prod.codigo||'', desc: prod.desc, qty: '', un: prod.un, preco: '', prodId: prod.id });
+    calcPedidoTotal();
+  }
+  closeModal('modal-produto-picker');
 }
 
 // ============================================================
