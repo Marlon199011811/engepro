@@ -8,6 +8,7 @@
 <!-- Firebase v9 compat SDK -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <style>
   :root {
     --bg: #0d0f14;
@@ -435,6 +436,191 @@
   ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
   ::-webkit-scrollbar-thumb:hover { background: var(--text3); }
 
+  /* ============================================================
+     LOGIN SCREEN
+  ============================================================ */
+  #login-screen {
+    position: fixed; inset: 0; z-index: 9999;
+    background: var(--bg);
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
+  }
+  /* animated grid bg */
+  #login-screen::before {
+    content: '';
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(var(--border) 1px, transparent 1px),
+      linear-gradient(90deg, var(--border) 1px, transparent 1px);
+    background-size: 48px 48px;
+    opacity: 0.5;
+    mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 40%, transparent 100%);
+    -webkit-mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 40%, transparent 100%);
+  }
+  /* glow blob */
+  #login-screen::after {
+    content: '';
+    position: absolute;
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, var(--accent-glow) 0%, transparent 65%);
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+  }
+  .login-card {
+    position: relative; z-index: 1;
+    width: 420px;
+    background: var(--bg2);
+    border: 1px solid var(--border2);
+    border-radius: 16px;
+    box-shadow: 0 32px 80px rgba(0,0,0,0.5), 0 0 0 1px rgba(245,158,11,0.08);
+    overflow: hidden;
+    animation: loginAppear 0.4s cubic-bezier(.34,1.56,.64,1);
+  }
+  @keyframes loginAppear {
+    from { opacity:0; transform: scale(0.9) translateY(24px); }
+    to   { opacity:1; transform: none; }
+  }
+  .login-header {
+    padding: 32px 32px 24px;
+    border-bottom: 1px solid var(--border);
+    text-align: center;
+    background: linear-gradient(180deg, var(--bg3) 0%, transparent 100%);
+  }
+  .login-logo {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 36px; font-weight: 800; letter-spacing: 3px; line-height: 1;
+  }
+  .login-logo .l-eng { color: var(--accent); }
+  .login-logo .l-pro { color: var(--text2); }
+  .login-tagline {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px; color: var(--text3);
+    letter-spacing: 2px; text-transform: uppercase; margin-top: 6px;
+  }
+  /* TABS */
+  .login-tabs {
+    display: flex; border-bottom: 1px solid var(--border);
+  }
+  .login-tab {
+    flex: 1; padding: 14px; text-align: center; cursor: pointer;
+    font-size: 13px; font-weight: 600; color: var(--text3);
+    transition: all 0.2s; border-bottom: 2px solid transparent;
+    font-family: 'Barlow', sans-serif; letter-spacing: 0.5px;
+    background: none; border-top: none; border-left: none; border-right: none;
+  }
+  .login-tab.active { color: var(--accent); border-bottom-color: var(--accent); background: var(--accent-dim); }
+  .login-tab:hover:not(.active) { color: var(--text2); background: var(--bg3); }
+  /* FORMS */
+  .login-body { padding: 28px 32px 32px; }
+  .login-field { margin-bottom: 18px; }
+  .login-field label {
+    display: block; font-size: 11px; font-weight: 700;
+    letter-spacing: 1.5px; text-transform: uppercase; color: var(--text3);
+    font-family: 'Space Mono', monospace; margin-bottom: 7px;
+  }
+  .login-input-wrap { position: relative; }
+  .login-input-wrap .input-icon {
+    position: absolute; left: 13px; top: 50%; transform: translateY(-50%);
+    font-size: 15px; pointer-events: none; opacity: 0.5;
+  }
+  .login-field input {
+    width: 100%; background: var(--bg3); border: 1px solid var(--border2);
+    color: var(--text); border-radius: 8px;
+    padding: 12px 13px 12px 40px; font-size: 14px;
+    font-family: 'Barlow', sans-serif; outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .login-field input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-dim);
+  }
+  .login-field input::placeholder { color: var(--text3); }
+  .login-error {
+    background: var(--red-dim); border: 1px solid rgba(239,68,68,0.3);
+    border-radius: 8px; padding: 10px 14px;
+    font-size: 13px; color: var(--red);
+    margin-bottom: 16px; display: none;
+    line-height: 1.4;
+  }
+  .login-error.show { display: block; animation: fadeIn 0.2s; }
+  .login-success {
+    background: var(--green-dim); border: 1px solid rgba(16,185,129,0.3);
+    border-radius: 8px; padding: 10px 14px;
+    font-size: 13px; color: var(--green);
+    margin-bottom: 16px; display: none;
+    line-height: 1.4;
+  }
+  .login-success.show { display: block; animation: fadeIn 0.2s; }
+  .btn-login {
+    width: 100%; padding: 13px; border-radius: 8px;
+    background: var(--accent); color: #000;
+    font-size: 14px; font-weight: 700; cursor: pointer;
+    border: none; letter-spacing: 1px; text-transform: uppercase;
+    font-family: 'Barlow Condensed', sans-serif;
+    transition: all 0.15s; margin-top: 4px;
+  }
+  .btn-login:hover { background: var(--accent2); transform: translateY(-1px); box-shadow: 0 4px 16px var(--accent-glow); }
+  .btn-login:active { transform: none; }
+  .btn-login:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+  .login-divider {
+    text-align: center; font-size: 12px; color: var(--text3);
+    margin: 16px 0; font-family: 'Space Mono', monospace;
+    position: relative;
+  }
+  .login-divider::before, .login-divider::after {
+    content: ''; position: absolute; top: 50%;
+    width: 38%; height: 1px; background: var(--border);
+  }
+  .login-divider::before { left: 0; }
+  .login-divider::after { right: 0; }
+  .login-footer-note {
+    text-align: center; font-size: 12px; color: var(--text3); margin-top: 16px;
+  }
+  /* PASSWORD TOGGLE */
+  .pw-toggle {
+    position: absolute; right: 13px; top: 50%; transform: translateY(-50%);
+    background: none; border: none; color: var(--text3); cursor: pointer;
+    font-size: 15px; padding: 2px; transition: color 0.15s;
+  }
+  .pw-toggle:hover { color: var(--text2); }
+  /* PASSWORD STRENGTH */
+  .pw-strength { margin-top: 8px; }
+  .pw-strength-bar {
+    height: 3px; border-radius: 2px; background: var(--border);
+    overflow: hidden; margin-bottom: 4px;
+  }
+  .pw-strength-fill {
+    height: 100%; border-radius: 2px; transition: width 0.3s, background 0.3s;
+    width: 0%;
+  }
+  .pw-strength-label { font-size: 10px; color: var(--text3); font-family: 'Space Mono', monospace; }
+
+  /* USER CHIP in topbar */
+  .user-chip {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--bg3); border: 1px solid var(--border2);
+    border-radius: 20px; padding: 5px 12px 5px 6px; cursor: pointer;
+    transition: all 0.15s;
+  }
+  .user-chip:hover { border-color: var(--accent); background: var(--accent-dim); }
+  .user-avatar {
+    width: 26px; height: 26px; border-radius: 50%;
+    background: var(--accent); color: #000;
+    font-size: 11px; font-weight: 800;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Barlow Condensed', sans-serif; flex-shrink: 0;
+  }
+  .user-email { font-size: 12px; color: var(--text2); max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .btn-logout {
+    background: var(--red-dim); border: 1px solid rgba(239,68,68,0.25);
+    color: var(--red); border-radius: var(--radius);
+    padding: 6px 12px; font-size: 12px; font-weight: 600;
+    cursor: pointer; font-family: 'Barlow', sans-serif;
+    transition: all 0.15s; white-space: nowrap;
+  }
+  .btn-logout:hover { background: var(--red); color: #fff; }
+
   /* RESPONSIVE */
   @media (max-width: 900px) {
     #sidebar { transform: translateX(-220px); }
@@ -448,6 +634,103 @@
 </style>
 </head>
 <body>
+
+<!-- ====================================================
+     LOGIN SCREEN
+===================================================== -->
+<div id="login-screen">
+  <div class="login-card">
+
+    <div class="login-header">
+      <div class="login-logo"><span class="l-eng">ENG</span><span class="l-pro">PRO</span></div>
+      <div class="login-tagline">Controle de Cotações &amp; Compras</div>
+    </div>
+
+    <div class="login-tabs">
+      <button class="login-tab active" id="tab-login" onclick="switchTab('login')">Entrar</button>
+      <button class="login-tab" id="tab-register" onclick="switchTab('register')">Criar Conta</button>
+    </div>
+
+    <!-- LOGIN FORM -->
+    <div class="login-body" id="form-login">
+      <div class="login-error" id="login-error"></div>
+      <div class="login-success" id="login-success"></div>
+
+      <div class="login-field">
+        <label>E-mail</label>
+        <div class="login-input-wrap">
+          <span class="input-icon">✉️</span>
+          <input type="email" id="login-email" placeholder="seu@email.com" autocomplete="email">
+        </div>
+      </div>
+      <div class="login-field">
+        <label>Senha</label>
+        <div class="login-input-wrap">
+          <span class="input-icon">🔒</span>
+          <input type="password" id="login-pw" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
+          <button class="pw-toggle" onclick="togglePw('login-pw',this)" tabindex="-1">👁</button>
+        </div>
+      </div>
+
+      <button class="btn-login" id="btn-login" onclick="doLogin()">Entrar no Sistema</button>
+
+      <div class="login-footer-note">
+        Não tem conta? <span style="color:var(--accent);cursor:pointer;font-weight:600" onclick="switchTab('register')">Cadastre-se</span>
+      </div>
+    </div>
+
+    <!-- REGISTER FORM -->
+    <div class="login-body" id="form-register" style="display:none">
+      <div class="login-error" id="register-error"></div>
+      <div class="login-success" id="register-success"></div>
+
+      <div class="login-field">
+        <label>Nome Completo</label>
+        <div class="login-input-wrap">
+          <span class="input-icon">👤</span>
+          <input type="text" id="reg-name" placeholder="Seu nome completo" autocomplete="name">
+        </div>
+      </div>
+      <div class="login-field">
+        <label>E-mail</label>
+        <div class="login-input-wrap">
+          <span class="input-icon">✉️</span>
+          <input type="email" id="reg-email" placeholder="seu@email.com" autocomplete="email">
+        </div>
+      </div>
+      <div class="login-field">
+        <label>Senha</label>
+        <div class="login-input-wrap">
+          <span class="input-icon">🔒</span>
+          <input type="password" id="reg-pw" placeholder="Mínimo 6 caracteres" autocomplete="new-password" oninput="checkPwStrength(this.value)" onkeydown="if(event.key==='Enter')doRegister()">
+          <button class="pw-toggle" onclick="togglePw('reg-pw',this)" tabindex="-1">👁</button>
+        </div>
+        <div class="pw-strength">
+          <div class="pw-strength-bar"><div class="pw-strength-fill" id="pw-fill"></div></div>
+          <div class="pw-strength-label" id="pw-label">Digite uma senha</div>
+        </div>
+      </div>
+      <div class="login-field">
+        <label>Confirmar Senha</label>
+        <div class="login-input-wrap">
+          <span class="input-icon">🔒</span>
+          <input type="password" id="reg-pw2" placeholder="Repita a senha" autocomplete="new-password" onkeydown="if(event.key==='Enter')doRegister()">
+          <button class="pw-toggle" onclick="togglePw('reg-pw2',this)" tabindex="-1">👁</button>
+        </div>
+      </div>
+
+      <button class="btn-login" id="btn-register" onclick="doRegister()">Criar Conta</button>
+
+      <div class="login-footer-note">
+        Já tem conta? <span style="color:var(--accent);cursor:pointer;font-weight:600" onclick="switchTab('login')">Entrar</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- MAIN APP (hidden until logged in) -->
+<div id="app-wrapper" style="display:none">
 
 <!-- SIDEBAR -->
 <nav id="sidebar">
@@ -497,6 +780,11 @@
     <div class="topbar-title" id="topbar-title">Dashboard</div>
     <div class="topbar-right">
       <div class="topbar-date" id="topbar-date"></div>
+      <div class="user-chip" id="user-chip" title="Usuário logado" style="display:none">
+        <div class="user-avatar" id="user-avatar">?</div>
+        <span class="user-email" id="user-email-display"></span>
+      </div>
+      <button class="btn-logout" id="btn-logout" onclick="doLogout()" style="display:none">Sair</button>
       <button id="theme-toggle" onclick="toggleTheme()" title="Alternar tema" style="background:var(--bg3);border:1px solid var(--border2);color:var(--text2);border-radius:var(--radius);width:34px;height:34px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">🌙</button>
     </div>
   </div>
@@ -954,10 +1242,10 @@
         <input id="fb-appId" placeholder="1:123456:web:abc123">
       </div>
       <div style="margin-top:16px;padding:12px;background:var(--bg3);border-radius:var(--radius);font-size:11px;color:var(--text3);line-height:1.7">
+        <strong style="color:var(--text2)">⚠️ Ative o Firebase Authentication:</strong><br>
+        No Firebase Console → Build → <strong>Authentication → Primeiros passos</strong> → ative <strong>E-mail/senha</strong>.<br><br>
         <strong style="color:var(--text2)">⚠️ Regras do Firestore:</strong><br>
-        No Firebase Console → Firestore → Regras, use:<br>
-        <code style="color:var(--accent);font-size:10px">allow read, write: if true;</code><br>
-        (para uso interno/corporativo sem autenticação)
+        Firestore → Regras: <code style="color:var(--accent);font-size:10px">allow read, write: if request.auth != null;</code>
       </div>
     </div>
     <div class="modal-footer" style="justify-content:space-between">
@@ -970,7 +1258,153 @@
   </div>
 </div>
 
+</div><!-- /app-wrapper -->
+
 <script>
+// ============================================================
+// AUTH — Login / Register / Logout
+// ============================================================
+let currentUser = null;
+
+function switchTab(tab) {
+  document.getElementById('form-login').style.display    = tab==='login'    ? '' : 'none';
+  document.getElementById('form-register').style.display = tab==='register' ? '' : 'none';
+  document.getElementById('tab-login').classList.toggle('active', tab==='login');
+  document.getElementById('tab-register').classList.toggle('active', tab==='register');
+  clearAuthMessages();
+}
+
+function clearAuthMessages() {
+  ['login-error','login-success','register-error','register-success'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) { el.classList.remove('show'); el.textContent = ''; }
+  });
+}
+
+function showAuthMsg(id, msg, isError=true) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.textContent = msg; el.classList.add('show');
+}
+
+function togglePw(inputId, btn) {
+  const inp = document.getElementById(inputId);
+  if (inp.type === 'password') { inp.type = 'text'; btn.textContent = '🙈'; }
+  else { inp.type = 'password'; btn.textContent = '👁'; }
+}
+
+function checkPwStrength(pw) {
+  const fill  = document.getElementById('pw-fill');
+  const label = document.getElementById('pw-label');
+  if (!fill) return;
+  let score = 0;
+  if (pw.length >= 6) score++;
+  if (pw.length >= 10) score++;
+  if (/[A-Z]/.test(pw)) score++;
+  if (/[0-9]/.test(pw)) score++;
+  if (/[^A-Za-z0-9]/.test(pw)) score++;
+  const levels = [
+    { pct:'0%',   color:'var(--border)',  text:'Digite uma senha' },
+    { pct:'25%',  color:'var(--red)',     text:'Muito fraca' },
+    { pct:'50%',  color:'var(--accent)',  text:'Fraca' },
+    { pct:'70%',  color:'var(--accent2)', text:'Boa' },
+    { pct:'85%',  color:'var(--blue)',    text:'Forte' },
+    { pct:'100%', color:'var(--green)',   text:'Muito forte 🔐' },
+  ];
+  const l = levels[Math.min(score, 5)];
+  fill.style.width = l.pct; fill.style.background = l.color; label.textContent = l.text;
+}
+
+function fbErrMsg(code) {
+  const map = {
+    'auth/user-not-found': 'E-mail não encontrado. Verifique ou crie uma conta.',
+    'auth/wrong-password': 'Senha incorreta. Tente novamente.',
+    'auth/invalid-credential': 'E-mail ou senha inválidos.',
+    'auth/email-already-in-use': 'Este e-mail já está cadastrado.',
+    'auth/weak-password': 'Senha muito fraca. Use ao menos 6 caracteres.',
+    'auth/invalid-email': 'E-mail inválido.',
+    'auth/too-many-requests': 'Muitas tentativas. Aguarde alguns minutos.',
+    'auth/network-request-failed': 'Erro de conexão. Verifique sua internet.',
+  };
+  return map[code] || 'Erro inesperado. Tente novamente.';
+}
+
+async function doLogin() {
+  if (!firebase.apps.length) {
+    showAuthMsg('login-error', 'Configure o Firebase antes de fazer login. Clique em "⚙ Configurar Firebase" na tela principal.'); return;
+  }
+  const email = document.getElementById('login-email').value.trim();
+  const pw    = document.getElementById('login-pw').value;
+  if (!email || !pw) { showAuthMsg('login-error','Preencha e-mail e senha.'); return; }
+  const btn = document.getElementById('btn-login');
+  btn.disabled = true; btn.textContent = 'Entrando...';
+  clearAuthMessages();
+  try {
+    await firebase.auth().signInWithEmailAndPassword(email, pw);
+    // onAuthStateChanged handles the rest
+  } catch(e) {
+    showAuthMsg('login-error', fbErrMsg(e.code));
+    btn.disabled = false; btn.textContent = 'Entrar no Sistema';
+  }
+}
+
+async function doRegister() {
+  if (!firebase.apps.length) {
+    showAuthMsg('register-error', 'Configure o Firebase antes de cadastrar.'); return;
+  }
+  const name  = document.getElementById('reg-name').value.trim();
+  const email = document.getElementById('reg-email').value.trim();
+  const pw    = document.getElementById('reg-pw').value;
+  const pw2   = document.getElementById('reg-pw2').value;
+  if (!name)           { showAuthMsg('register-error','Informe seu nome.'); return; }
+  if (!email)          { showAuthMsg('register-error','Informe seu e-mail.'); return; }
+  if (pw.length < 6)   { showAuthMsg('register-error','A senha deve ter pelo menos 6 caracteres.'); return; }
+  if (pw !== pw2)      { showAuthMsg('register-error','As senhas não conferem.'); return; }
+  const btn = document.getElementById('btn-register');
+  btn.disabled = true; btn.textContent = 'Criando conta...';
+  clearAuthMessages();
+  try {
+    const cred = await firebase.auth().createUserWithEmailAndPassword(email, pw);
+    await cred.user.updateProfile({ displayName: name });
+    showAuthMsg('register-success', `✅ Conta criada! Bem-vindo, ${name}!`, false);
+    btn.disabled = false; btn.textContent = 'Criar Conta';
+    // onAuthStateChanged will fire and open the app
+  } catch(e) {
+    showAuthMsg('register-error', fbErrMsg(e.code));
+    btn.disabled = false; btn.textContent = 'Criar Conta';
+  }
+}
+
+async function doLogout() {
+  if (confirm('Deseja sair do sistema?')) {
+    await firebase.auth().signOut();
+  }
+}
+
+function showApp(user) {
+  currentUser = user;
+  // Update user chip in topbar
+  const initials = (user.displayName || user.email || '?').charAt(0).toUpperCase();
+  document.getElementById('user-avatar').textContent = initials;
+  document.getElementById('user-email-display').textContent = user.displayName || user.email;
+  document.getElementById('user-chip').style.display = 'flex';
+  document.getElementById('btn-logout').style.display = '';
+  // Hide login, show app
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app-wrapper').style.display = '';
+}
+
+function showLogin() {
+  currentUser = null;
+  document.getElementById('user-chip').style.display = 'none';
+  document.getElementById('btn-logout').style.display = 'none';
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('app-wrapper').style.display = 'none';
+  // Reset login button
+  const btn = document.getElementById('btn-login');
+  if (btn) { btn.disabled = false; btn.textContent = 'Entrar no Sistema'; }
+}
+
 // ============================================================
 // FIREBASE
 // ============================================================
@@ -1015,6 +1449,28 @@ function initFirebase(cfg) {
     firebase.initializeApp(cfg);
     db = firebase.firestore();
 
+    // AUTH STATE LISTENER — controls login screen visibility
+    firebase.auth().onAuthStateChanged(user => {
+      if (user) {
+        showApp(user);
+        startFirestoreListeners();
+      } else {
+        showLogin();
+        // stop Firestore listeners when logged out
+        fbUnsubscribers.forEach(u => u());
+        fbUnsubscribers = [];
+        setStatus(false);
+      }
+    });
+
+  } catch(e) {
+    console.error('Firebase init error:', e);
+    setStatus(false);
+    alert('Erro ao conectar ao Firebase. Verifique as configurações.\n\n' + e.message);
+  }
+}
+
+function startFirestoreListeners() {
     // Unsubscribe previous listeners
     fbUnsubscribers.forEach(u => u());
     fbUnsubscribers = [];
@@ -1035,11 +1491,6 @@ function initFirebase(cfg) {
       });
       fbUnsubscribers.push(unsub);
     });
-  } catch(e) {
-    console.error('Firebase init error:', e);
-    setStatus(false);
-    alert('Erro ao conectar ao Firebase. Verifique as configurações.\n\n' + e.message);
-  }
 }
 
 function renderAll() {
@@ -1851,10 +2302,18 @@ function init() {
       document.getElementById('fb-projectId').value = cfg.projectId||'';
       document.getElementById('fb-appId').value = cfg.appId||'';
       initFirebase(cfg);
+      // onAuthStateChanged handles show/hide of login
     } else {
+      // No Firebase config — show app directly in local/offline mode
       setStatus(false);
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('app-wrapper').style.display = '';
     }
-  } catch(e) { setStatus(false); }
+  } catch(e) {
+    setStatus(false);
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('app-wrapper').style.display = '';
+  }
 }
 init();
 </script>
