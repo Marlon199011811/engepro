@@ -921,6 +921,17 @@
       <div class="login-tagline">Controle de Cotações &amp; Compras</div>
     </div>
 
+    <!-- Firebase not configured warning -->
+    <div id="login-fb-warning" style="display:none;margin:0;padding:12px 20px;background:rgba(245,158,11,0.10);border-bottom:1px solid rgba(245,158,11,0.25)">
+      <div style="font-size:12px;color:var(--accent);line-height:1.6">
+        <strong>⚠️ Firebase não configurado.</strong><br>
+        Configure o banco de dados para habilitar o login.
+      </div>
+      <button onclick="openLoginFirebaseConfig()" style="margin-top:8px;width:100%;background:var(--accent);color:#000;border:none;border-radius:6px;padding:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Space Mono',monospace;letter-spacing:1px">
+        ⚙ CONFIGURAR FIREBASE
+      </button>
+    </div>
+
     <div class="login-tabs">
       <button class="login-tab active" id="tab-login" onclick="switchTab('login')">Entrar</button>
       <button class="login-tab" id="tab-register" onclick="switchTab('register')">Criar Conta</button>
@@ -2249,6 +2260,17 @@ function renderAdminSistema(area) {
         <button class="btn btn-danger btn-sm" onclick="if(confirm('Limpar cache local?')){localStorage.removeItem('engpro_state');showToast('Cache local limpo.');}">🗑 Limpar Cache Local</button>
       </div>
     </div>`;
+}
+
+// ---- OPEN FIREBASE CONFIG FROM LOGIN SCREEN ----
+function openLoginFirebaseConfig() {
+  document.getElementById('app-wrapper').style.display = '';
+  document.getElementById('main').style.visibility = 'hidden';
+  openModal('modal-firebase');
+}
+function saveFirebaseConfigFromLogin() {
+  saveFirebaseConfig();
+  document.getElementById('main').style.visibility = '';
 }
 
 // ---- TOAST ----
@@ -3601,6 +3623,19 @@ function loadTheme() {
 }
 
 // ============================================================
+// FIREBASE CONFIG — COLE SUAS CREDENCIAIS AQUI
+// ============================================================
+// Obtenha em: console.firebase.google.com → Configurações → Seus apps → Web
+const FIREBASE_CONFIG = {
+  apiKey:            "AIzaSyB8Bpfnxd4eo7TV3j2Z5XexGgH7TtkyNLM",
+  authDomain:        "engepro---engenharia.firebaseapp.com",
+  projectId:         "engepro---engenharia",
+  storageBucket:     "engepro---engenharia.firebasestorage.app",
+  messagingSenderId: "59965182374",
+  appId:             "1:59965182374:web:242fc175e3a041cd4c7f67"
+};
+
+// ============================================================
 // INIT
 // ============================================================
 function init() {
@@ -3611,27 +3646,24 @@ function init() {
   renderDashboard();
   updateBadges();
 
-  // Load saved Firebase config
-  try {
-    const saved = localStorage.getItem('engpro_fb_config');
-    if (saved) {
-      const cfg = JSON.parse(saved);
-      document.getElementById('fb-apiKey').value = cfg.apiKey||'';
-      document.getElementById('fb-authDomain').value = cfg.authDomain||'';
-      document.getElementById('fb-projectId').value = cfg.projectId||'';
-      document.getElementById('fb-appId').value = cfg.appId||'';
-      initFirebase(cfg);
-      // onAuthStateChanged handles show/hide of login
-    } else {
-      // No Firebase config — show app directly in local/offline mode
-      setStatus(false);
-      document.getElementById('login-screen').style.display = 'none';
-      document.getElementById('app-wrapper').style.display = '';
-    }
-  } catch(e) {
+  // Verifica se a config foi preenchida
+  const configValida = FIREBASE_CONFIG.apiKey && !FIREBASE_CONFIG.apiKey.includes('COLE_');
+
+  if (configValida) {
+    // Salva no localStorage e preenche o modal de config
+    localStorage.setItem('engpro_fb_config', JSON.stringify(FIREBASE_CONFIG));
+    document.getElementById('fb-apiKey').value     = FIREBASE_CONFIG.apiKey;
+    document.getElementById('fb-authDomain').value = FIREBASE_CONFIG.authDomain;
+    document.getElementById('fb-projectId').value  = FIREBASE_CONFIG.projectId;
+    document.getElementById('fb-appId').value      = FIREBASE_CONFIG.appId;
+    // Inicializa Firebase — onAuthStateChanged mostrará login ou app
+    initFirebase(FIREBASE_CONFIG);
+  } else {
+    // Config não preenchida — mostra tela de login com aviso
     setStatus(false);
-    document.getElementById('login-screen').style.display = 'none';
-    document.getElementById('app-wrapper').style.display = '';
+    document.getElementById('login-screen').style.display = 'flex';
+    document.getElementById('app-wrapper').style.display = 'none';
+    document.getElementById('login-fb-warning').style.display = '';
   }
 }
 init();
